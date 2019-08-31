@@ -4,22 +4,89 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	// "strings"
+	// "bufio"
 )
 
+// tatica: usar map contendo vetor de comandos (motivo: man)
+
 func main() {
-	arquivos, erro := ioutil.ReadDir("./")
+	/*
+		// pegar o comando digitado
+		scanner := bufio.NewScanner(os.Stdin)
+
+		for scanner.Scan() {
+			s := scanner.Text() //eh uma string
+
+			if s == "exit" {
+				os.Exit(1)
+			}
+
+			j := strings.Split(s, " ")
+			fmt.Println(j, len(j), "1°", j[0])
+			//%q outra opcao
+
+			for _, i := range j { //_ é index, i eh o valor
+				fmt.Printf("%s\n", i)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			os.Exit(1)
+		}
+	*/
+
+	// ls
+	dir, _ := os.Getwd()
+	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
 		log.Fatal(erro)
 	}
-
 	for i := 0; i < len(arquivos); i++ {
-		fmt.Printf(arquivos[i].Name() + "	")
+		st := arquivos[i].Name() + "   "
+		fmt.Printf(st)
 	}
 	println()
-	// for _, arq := range arquivos {
-	// 	fmt.Printf(arq.Name() + "    ")
+	fmt.Println(dir)
+
+	// cat
+	// content, _ := ioutil.ReadFile(arquivos[2].Name())
+	// fmt.Printf("File contents:\n%s", content)
+
+	// mkdir
+	// err := ioutil.WriteFile("testdata", []byte(""), 0644)
+	// if err != nil {
+	// log.Fatal(err)
 	// }
 
-	// dir, _ := os.Getwd()
-	// fmt.Println(dir)
+	// mv
+	// nomearq := "primeiro.go"
+	// err := os.Rename("../"+nomearq, "../LP/"+nomearq)
+	// if err != nil {
+	// fmt.Println(err)
+	// }
+
+	// rmdir
+	// os.Remove("./xuxu")
+
+	// clear
+	// for i := 0; i < 30; i++ {
+	// fmt.Println("")
+	// }
+
+	// man
+
+	// locate
+
+	// cd
+	// os.Chdir("/home/luiscap")
+	// mydir, err := os.Getwd()
+	// if err == nil {
+	// fmt.Println("novo dir:", mydir)
+	// }
+	// arquiv, erro := ioutil.ReadDir(mydir)
+	// for i := 0; i < len(arquiv); i++ {
+	// st := arquiv[i].Name() + "   "
+	// fmt.Printf(st)
+	// }
 }
