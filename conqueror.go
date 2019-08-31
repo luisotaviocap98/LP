@@ -9,7 +9,14 @@ import (
 	// "bufio"
 )
 
-// tatica: usar map contendo vetor de comandos (motivo: man)
+type Comando struct {
+	nome       string
+	operacao   func()
+	parametros [10]string
+	manual     string
+}
+
+// tatica: usar map contendo vetor de comandos e comparar com vetor de struct
 
 func main() {
 	/*
@@ -75,6 +82,7 @@ func main() {
 	// }
 
 	// man
+	// os.Open(Comando.manual)
 
 	// locate
 
@@ -89,4 +97,86 @@ func main() {
 	// st := arquiv[i].Name() + "   "
 	// fmt.Printf(st)
 	// }
+
+	/*
+		// mapeamento dos comandos
+		m := map[int]string{
+			0: "cd",
+			1: "ls",
+			2: "mv",
+			3: "cat",
+			4: "man",
+			5: "mkdir",
+			6: "rmdir",
+			7: "clear",
+			8: "locate",
+		}
+
+		str := "ls"
+		for _, j := range m {
+			if str == j {
+				println("bateu", j)
+			}
+		}
+	*/
+
+	/*
+		//vetor dos comandos
+		const cmds []Comando{
+			Comando{
+				nome: "cd"
+				operacao:
+				parametros:
+				manual: "cd.txt"
+			},
+			Comando{
+				nome: "ls"
+				operacao:
+				parametros:
+				manual: "ls.txt"
+			},
+			Comando{
+				nome: "mv"
+				operacao:
+				parametros:
+				manual: "mv.txt"
+			},
+			Comando{
+				nome: "cat"
+				operacao:
+				parametros:
+				manual: "cat.txt"
+			},
+			Comando{
+				nome: "man"
+				operacao:
+				parametros:
+				manual: "man.txt"
+			},
+			Comando{
+				nome: "mkdir"
+				operacao:
+				parametros:
+				manual: "mkdir.txt"
+			},
+			Comando{
+				nome: "rmdir"
+				operacao:
+				parametros:
+				manual: "rmdir.txt"
+			},
+			Comando{
+				nome: "clear"
+				operacao:
+				parametros:
+				manual: "clear.txt"
+			},
+			Comando{
+				nome: "locate"
+				operacao:
+				parametros:
+				manual: "locate.txt"
+			}
+		}
+	*/
 }
