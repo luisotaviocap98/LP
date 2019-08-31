@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	// "bufio"
 	// "strings"
+	// "bufio"
 )
 
 type Comando struct {
