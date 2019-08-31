@@ -1,3 +1,5 @@
 # LP
-linguagem de programacao
-Programa simulidar de shell em GO
+
+Projeto de Linguagens de Programacao
+
+Programa simulidor de shell em GO
