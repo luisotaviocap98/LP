@@ -31,6 +31,7 @@ func cd(caminho string) {
 
 func ls() {
 	// ls
+	// parametros : -a , -C , -i , -l , -s
 	dir, _ := os.Getwd()
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
@@ -46,6 +47,7 @@ func ls() {
 func mv() {
 
 	// mv
+	// parametro: --backup, --force
 	// nomearq := "primeiro.go"
 	// err := os.Rename("../"+nomearq, "../LP/"+nomearq)
 	// if err != nil {
@@ -53,30 +55,35 @@ func mv() {
 	// }
 }
 
-func cat() {
+func cat(arquivo string) {
 	// cat
-	// content, _ := ioutil.ReadFile(arquivos[2].Name())
-	// fmt.Printf("File contents:\n%s", content)
+	// parametro: -n, -b,
+	content, _ := ioutil.ReadFile(arquivo)
+	fmt.Printf("File contents:\n%s", content)
 }
 
 func man() {
 	// man
+	// parametros: --path
 	// os.Open(Comando.manual)
 }
 
 func mkdir(pasta string) {
 	// mkdir
+	// parametros: --parents
 	newpath := filepath.Join(pasta, "")
 	os.MkdirAll(newpath, os.ModePerm)
 }
 
 func rmdir(pasta string) {
 	// rmdir
+	// parametros: --ignore-fail, --parents
 	os.Remove("./" + pasta)
 }
 
 func clear() {
 	// clear
+	// nao possui parametros
 	fmt.Print("\033[H\033[2J")
 }
 
@@ -84,22 +91,28 @@ func locate() {
 
 }
 
-func selecionaComando(entrada string) {
-	switch entrada {
-	// case "cd":
-	// cd(caminho)
+func selecionaComando(entrada []string) {
+	str := entrada[0]
+	str2 := ""
+	if len(entrada) > 1 {
+		str2 = entrada[1]
+	}
+
+	switch str {
+	case "cd":
+		cd(str2)
 	case "ls":
 		ls()
 	case "mv":
 		mv()
 	case "cat":
-		cat()
+		cat(str2)
 	case "man":
 		man()
-	// case "mkdir":
-	// mkdir()
-	// case "rmdir":
-	// rmdir()
+	case "mkdir":
+		mkdir(str2)
+	case "rmdir":
+		rmdir(str2)
 	case "clear":
 		clear()
 	case "locate":
@@ -125,15 +138,9 @@ func main() {
 
 		j := strings.Split(s, " ")
 		// fmt.Println(j, len(j), "1°", j[0])
-		if j[0] == "cd" {
-			cd(j[1])
-		} else if j[0] == "mkdir" {
-			mkdir(j[1])
-		} else if j[0] == "rmdir" {
-			rmdir(j[1])
-		} else {
-			selecionaComando(j[0])
-		}
+
+		selecionaComando(j)
+
 		fmt.Printf("$ ")
 		// for _, i := range j { //_ é index, i eh o valor
 		// fmt.Printf("%s\n", i)
