@@ -90,19 +90,18 @@ func clear() {
 	fmt.Print("\033[H\033[2J")
 }
 
-func locate(nome string, diretorio string) {
-	os.Chdir(diretorio)
-	mydir, err := os.Getwd()
-	if err == nil {
-		fmt.Println("novo dir:", mydir)
-	}
-	arquiv, _ := ioutil.ReadDir(mydir)
-	for i := 0; i < len(arquiv); i++ {
-		if arquiv[i].Name() == nome {
-			println(nome)
-		} else if arquiv[i].IsDir() {
-			locate(nome, arquiv[i].Name())
-		}
+func locate(nome string) {
+
+	err := filepath.Walk("/home/luiscap/",
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			fmt.Println(path, info.Size())
+			return nil
+		})
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -135,7 +134,7 @@ func selecionaComando(entrada []string) {
 	case "clear":
 		clear()
 	case "locate":
-		locate(str2, "/home/luiscap/")
+		locate(str2)
 	default:
 		println("comando invalido")
 	}
