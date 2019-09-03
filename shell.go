@@ -44,15 +44,18 @@ func ls() {
 	println()
 }
 
-func mv() {
+func mv(origem, destino string) {
 
 	// mv
 	// parametro: --backup, --force
 	// nomearq := "primeiro.go"
-	// err := os.Rename("../"+nomearq, "../LP/"+nomearq)
-	// if err != nil {
-	// fmt.Println(err)
-	// }
+	x, _ := os.Getwd()
+	j := x + "/" + origem
+	y := x + "/" + destino
+	err := os.Rename(j, y)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func cat(arquivo string) {
@@ -87,15 +90,31 @@ func clear() {
 	fmt.Print("\033[H\033[2J")
 }
 
-func locate() {
-
+func locate(nome string, diretorio string) {
+	os.Chdir(diretorio)
+	mydir, err := os.Getwd()
+	if err == nil {
+		fmt.Println("novo dir:", mydir)
+	}
+	arquiv, _ := ioutil.ReadDir(mydir)
+	for i := 0; i < len(arquiv); i++ {
+		if arquiv[i].Name() == nome {
+			println(nome)
+		} else if arquiv[i].IsDir() {
+			locate(nome, arquiv[i].Name())
+		}
+	}
 }
 
 func selecionaComando(entrada []string) {
 	str := entrada[0]
 	str2 := ""
+	str3 := ""
 	if len(entrada) > 1 {
 		str2 = entrada[1]
+	}
+	if len(entrada) > 2 {
+		str3 = entrada[2]
 	}
 
 	switch str {
@@ -104,7 +123,7 @@ func selecionaComando(entrada []string) {
 	case "ls":
 		ls()
 	case "mv":
-		mv()
+		mv(str2, str3)
 	case "cat":
 		cat(str2)
 	case "man":
@@ -116,7 +135,7 @@ func selecionaComando(entrada []string) {
 	case "clear":
 		clear()
 	case "locate":
-		locate()
+		locate(str2, "/home/luiscap/")
 	default:
 		println("comando invalido")
 	}
@@ -125,29 +144,25 @@ func selecionaComando(entrada []string) {
 func main() {
 
 	// pegar o comando digitado
-	fmt.Printf("$ ")
+	dir, _ := os.Getwd()
+	fmt.Printf(dir + "$ ")
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-
-		s := scanner.Text() //eh uma string
+		s := scanner.Text()
 
 		if s == "exit" {
 			os.Exit(1)
 		}
 
 		j := strings.Split(s, " ")
-		// fmt.Println(j, len(j), "1°", j[0])
 
 		selecionaComando(j)
 
-		fmt.Printf("$ ")
-		// for _, i := range j { //_ é index, i eh o valor
-		// fmt.Printf("%s\n", i)
-		// }
+		dir2, _ := os.Getwd()
+		fmt.Printf(dir2 + "$ ")
 	}
 	if err := scanner.Err(); err != nil {
 		os.Exit(1)
 	}
-
 }
