@@ -6,26 +6,36 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
+
+var casa string
 
 func cd(caminho string) {
 	// cd
 	x := false
 	p := strings.Split(caminho, "/")
+
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
 	for i := 0; i < len(arq); i++ {
-		// problema com cd /home/luiscap/Downloads
-		if strings.HasSuffix(arq[i].Name(), p[0]) {
-			x = true
-			break
+		if p[0] == "" {
+			if len(p) > 1 && strings.HasSuffix(arq[i].Name(), p[1]) {
+				x = true
+				break
+			}
+		} else {
+			if strings.HasSuffix(arq[i].Name(), p[0]) {
+				x = true
+				break
+			}
 		}
 	}
 
 	if caminho == "~" || caminho == "" {
-		os.Chdir("/home/luiscap")
+		os.Chdir(casa)
 	} else if x || caminho == ".." {
 		os.Chdir(myd + "/" + caminho)
 	} else if x == false {
@@ -34,9 +44,9 @@ func cd(caminho string) {
 
 }
 
-func ls() {
+func ls(parametro string) {
 	// ls
-	// parametros : -a , -C , -i , -l , -s
+	// parametros : -valid, - hidden, - dirs, -files, -sortasc, -sortdesc, full
 	dir, _ := os.Getwd()
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
@@ -53,10 +63,7 @@ func ls() {
 }
 
 func mv(origem, destino string) {
-
 	// mv
-	// parametro: --backup, --force
-	// nomearq := "primeiro.go"
 	x, _ := os.Getwd()
 	j := x + "/" + origem
 	y := x + "/" + destino
@@ -68,56 +75,85 @@ func mv(origem, destino string) {
 
 func cat(arquivo string) {
 	// cat
-	// parametro: -n, -b,
 	content, _ := ioutil.ReadFile(arquivo)
 	fmt.Printf("File contents:\n%s", content)
 }
 
 func man() {
 	// man
-	// parametros: --path
-	// os.Open(Comando.manual)
+	// content, _ := ioutil.ReadFile(arquivo)
+	// fmt.Printf("File contents:\n%s", content)
 }
 
 func mkdir(pasta string) {
 	// mkdir
-	// parametros: --parents
 	newpath := filepath.Join(pasta, "")
 	os.MkdirAll(newpath, os.ModePerm)
 }
 
 func rmdir(pasta string) {
 	// rmdir
-	// parametros: --ignore-fail, --parents
 	file, _ := os.Open(pasta)
 	fi, _ := file.Stat()
 	if fi.IsDir() {
-		os.Remove("./" + pasta)
+		os.RemoveAll(pasta)
 	} else {
-		println("não é diretorio")
+		println(pasta, "não é diretorio")
 	}
+}
+
+func mkfile(arquivo string) {
+	// dir, _ := os.Getwd()
+	_, err := os.Stat(arquivo)
+
+	if os.IsNotExist(err) {
+		os.Create(arquivo)
+	} else if os.IsExist(err) {
+		println("ja existe")
+	}
+}
+
+func rmfile(arquivo string) {
+	file, _ := os.Open(arquivo)
+	fi, _ := file.Stat()
+	if fi.IsDir() {
+		println("isto nao é um arquivo")
+	} else {
+		os.Remove(arquivo)
+	}
+}
+
+func copy(origem, destino string) {
+
 }
 
 func clear() {
 	// clear
-	// nao possui parametros
 	fmt.Print("\033[H\033[2J")
 }
 
 func locate(nome string) {
-	err := filepath.Walk("/home/luiscap/",
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if strings.HasSuffix(path, nome) {
-				println(path)
-				return filepath.SkipDir
-			}
-			return nil
-		})
+	paf := ""
+	fnd := false
+	dir, _ := os.Getwd()
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if strings.HasSuffix(path, nome) {
+			paf = path
+			fnd = true
+			return filepath.SkipDir
+		}
+		return nil
+	})
 	if err != nil {
 		log.Println(err)
+	}
+	if fnd {
+		println(paf)
+	} else {
+		println("nao encontrado")
 	}
 }
 
@@ -136,7 +172,7 @@ func selecionaComando(entrada []string) {
 	case "cd":
 		cd(str2)
 	case "ls":
-		ls()
+		ls(str2)
 	case "mv":
 		mv(str2, str3)
 	case "cat":
@@ -151,13 +187,23 @@ func selecionaComando(entrada []string) {
 		clear()
 	case "locate":
 		locate(str2)
+	case "rmfile":
+		rmfile(str2)
+	case "mkfile":
+		mkfile(str2)
+	case "copy":
+		copy(str2, str3)
 	default:
 		println("comando invalido")
 	}
 }
 
 func main() {
-
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	casa = usr.HomeDir
 	// pegar o comando digitado
 	dir, _ := os.Getwd()
 	fmt.Printf(dir + "$ ")
@@ -167,7 +213,7 @@ func main() {
 		s := scanner.Text()
 
 		if s == "exit" {
-			os.Exit(1)
+			os.Exit(0)
 		}
 
 		j := strings.Split(s, " ")
