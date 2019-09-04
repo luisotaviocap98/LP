@@ -8,25 +8,30 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	// "strings"
-	// "bufio"
 )
 
 func cd(caminho string) {
 	// cd
-	atual, _ := os.Getwd()
-	fmt.Println("antigo dir:", atual)
-	os.Chdir(atual + "/" + caminho)
-	mydir, err := os.Getwd()
-	if err == nil {
-		fmt.Println("novo dir:", mydir)
+	x := false
+	p := strings.Split(caminho, "/")
+	myd, _ := os.Getwd()
+	arq, _ := ioutil.ReadDir(myd)
+	for i := 0; i < len(arq); i++ {
+		// problema com cd /home/luiscap/Downloads
+		if strings.HasSuffix(arq[i].Name(), p[0]) {
+			x = true
+			break
+		}
 	}
-	arquiv, _ := ioutil.ReadDir(mydir)
-	for i := 0; i < len(arquiv); i++ {
-		st := arquiv[i].Name() + "   "
-		fmt.Printf(st)
+
+	if caminho == "~" || caminho == "" {
+		os.Chdir("/home/luiscap")
+	} else if x || caminho == ".." {
+		os.Chdir(myd + "/" + caminho)
+	} else if x == false {
+		os.Chdir(caminho)
 	}
-	println()
+
 }
 
 func ls() {
@@ -37,11 +42,14 @@ func ls() {
 	if erro != nil {
 		log.Fatal(erro)
 	}
-	for i := 0; i < len(arquivos); i++ {
-		st := arquivos[i].Name() + "   "
-		fmt.Printf(st)
+	if len(arquivos) > 0 {
+
+		for i := 0; i < len(arquivos); i++ {
+			st := arquivos[i].Name() + "   "
+			fmt.Printf(st)
+		}
+		println()
 	}
-	println()
 }
 
 func mv(origem, destino string) {
@@ -81,7 +89,13 @@ func mkdir(pasta string) {
 func rmdir(pasta string) {
 	// rmdir
 	// parametros: --ignore-fail, --parents
-	os.Remove("./" + pasta)
+	file, _ := os.Open(pasta)
+	fi, _ := file.Stat()
+	if fi.IsDir() {
+		os.Remove("./" + pasta)
+	} else {
+		println("não é diretorio")
+	}
 }
 
 func clear() {
@@ -91,13 +105,15 @@ func clear() {
 }
 
 func locate(nome string) {
-
 	err := filepath.Walk("/home/luiscap/",
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			fmt.Println(path, info.Size())
+			if strings.HasSuffix(path, nome) {
+				println(path)
+				return filepath.SkipDir
+			}
 			return nil
 		})
 	if err != nil {
