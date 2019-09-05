@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -64,13 +65,28 @@ func ls(parametro string) {
 
 func mv(origem, destino string) {
 	// mv
-	x, _ := os.Getwd()
-	j := x + "/" + origem
-	y := x + "/" + destino
-	err := os.Rename(j, y)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// atualmente movendo apenas arquivos
+	inputFile, _ := os.Open(origem)
+	// if err != nil {
+	// return fmt.Errorf("Couldn't open source file: %s", err)
+	// }
+	outputFile, _ := os.Create(destino)
+	// if err != nil {
+	// inputFile.Close()
+	// return fmt.Errorf("Couldn't open dest file: %s", err)
+	// }
+	defer outputFile.Close()
+	io.Copy(outputFile, inputFile)
+	inputFile.Close()
+	// if err != nil {
+	// return fmt.Errorf("Writing to output file failed: %s", err)
+	// }
+	// The copy was successful, so now delete the original file
+	os.Remove(origem)
+	// if err != nil {
+	// return fmt.Errorf("Failed removing original file: %s", err)
+	// }
+	// return nil
 }
 
 func cat(arquivo string) {
@@ -124,6 +140,19 @@ func rmfile(arquivo string) {
 }
 
 func copy(origem, destino string) {
+	r, err := os.Open(origem)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Close()
+
+	w, err := os.Create(destino)
+	if err != nil {
+		panic(err)
+	}
+	defer w.Close()
+
+	io.Copy(w, r)
 
 }
 
