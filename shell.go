@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -45,19 +46,78 @@ func cd(caminho string) {
 
 }
 
+func leftjust(s string, n int, fill string) string {
+	return s + strings.Repeat(fill, n)
+}
+
 func ls(parametro string) {
 	// ls
 	// parametros : -valid, - hidden, - dirs, -files, -sortasc, -sortdesc, full
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, _ := cmd.Output()
+
+	x, tam := 1, 0
+	for i := len(out) - 2; i >= 3; i-- {
+		tam += (int(out[i]) - 48) * x
+		x = x * 10
+	}
+
 	dir, _ := os.Getwd()
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
 		log.Fatal(erro)
 	}
+	cont := 0
+
+	// if parametro == "-dirs" {
+	// onlyd := true
+	// } else if parametro == "-files" {
+	// onlyf := true
+	// } else if parametro == "-full" {
+	// file, _ := os.Open(arquivos[i].Name())
+	// defer file.Close()
+	// stat, _ := file.Stat()
+	// fmt.Printf("%s %v", st, stat.Size())
+	// err = os.Chown("test.txt", os.Getuid(), os.Getgid())
+	// if err != nil {
+	// log.Println(err)
+	// }
+	// fileInfo, err = os.Stat("test.txt")
+	// if err != nil {
+	// log.Fatal(err)
+	// }
+	// fmt.Println("File name:", fileInfo.Name())
+	// fmt.Println("Size in bytes:", fileInfo.Size())
+	// fmt.Println("Permissions:", fileInfo.Mode())
+	// fmt.Println("Last modified:", fileInfo.ModTime())
+	// fmt.Println("Is Directory: ", fileInfo.IsDir())
+	// fmt.Printf("System interface type: %T\n", fileInfo.Sys())
+	// fmt.Printf("System info: %+v\n\n", fileInfo.Sys())
+	// }
+	// if parametro == "sort"{
+	// strs := []string{"c", "a", "b"}
+	// sort.Strings(strs)
+	// fmt.Println("Strings:", strs)
+	// reverso sort.Sort(sort.Reverse(strSlice[:]))
+	// }
+	// unix/linux file or directory that starts with . is hidden
+	// if filename[0:1] == "." {
+	// return true, nil
+	//
+	// }
+
 	if len(arquivos) > 0 {
 
 		for i := 0; i < len(arquivos); i++ {
-			st := arquivos[i].Name() + "   "
-			fmt.Printf(st)
+			st := arquivos[i].Name()
+			cont += len(arquivos[i].Name()) + 5
+			if cont < tam {
+				fmt.Printf(leftjust(st, 5, " "))
+			} else {
+				cont = 0
+				println()
+			}
 		}
 		println()
 	}
@@ -65,28 +125,14 @@ func ls(parametro string) {
 
 func mv(origem, destino string) {
 	// mv
-	// atualmente movendo apenas arquivos
-	inputFile, _ := os.Open(origem)
-	// if err != nil {
-	// return fmt.Errorf("Couldn't open source file: %s", err)
-	// }
-	outputFile, _ := os.Create(destino)
-	// if err != nil {
-	// inputFile.Close()
-	// return fmt.Errorf("Couldn't open dest file: %s", err)
-	// }
-	defer outputFile.Close()
-	io.Copy(outputFile, inputFile)
-	inputFile.Close()
-	// if err != nil {
-	// return fmt.Errorf("Writing to output file failed: %s", err)
-	// }
-	// The copy was successful, so now delete the original file
-	os.Remove(origem)
-	// if err != nil {
-	// return fmt.Errorf("Failed removing original file: %s", err)
-	// }
-	// return nil
+	src, _ := os.Stat(origem)
+	if !src.IsDir() {
+		CopyFile(origem, destino)
+	} else {
+		CopyDir(origem, destino)
+	}
+	os.RemoveAll(origem)
+
 }
 
 func cat(arquivo string) {
@@ -119,13 +165,14 @@ func rmdir(pasta string) {
 }
 
 func mkfile(arquivo string) {
-	// dir, _ := os.Getwd()
-	_, err := os.Stat(arquivo)
-
-	if os.IsNotExist(err) {
-		os.Create(arquivo)
-	} else if os.IsExist(err) {
-		println("ja existe")
+	dir, _ := os.Getwd()
+	_, err := os.Stat(dir + "/" + arquivo)
+	if err != nil {
+		if os.IsNotExist(err) {
+			os.Create(arquivo)
+		} else if os.IsExist(err) {
+			println("ja existe")
+		}
 	}
 }
 
@@ -140,20 +187,79 @@ func rmfile(arquivo string) {
 }
 
 func copy(origem, destino string) {
-	r, err := os.Open(origem)
-	if err != nil {
-		panic(err)
+	src, _ := os.Stat(origem)
+	if !src.IsDir() {
+		CopyFile(origem, destino)
+	} else {
+		CopyDir(origem, destino)
 	}
-	defer r.Close()
 
-	w, err := os.Create(destino)
+}
+
+func CopyFile(source string, dest string) (err error) {
+	sourcefile, err := os.Open(source)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer w.Close()
 
-	io.Copy(w, r)
+	defer sourcefile.Close()
 
+	destfile, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+
+	defer destfile.Close()
+
+	_, err = io.Copy(destfile, sourcefile)
+	if err == nil {
+		sourceinfo, err := os.Stat(source)
+		if err != nil {
+			err = os.Chmod(dest, sourceinfo.Mode())
+		}
+
+	}
+	return
+}
+
+func CopyDir(source string, dest string) (err error) {
+	// get properties of source dir
+	sourceinfo, err := os.Stat(source)
+	if err != nil {
+		return err
+	}
+
+	// create dest dir
+	err = os.MkdirAll(dest, sourceinfo.Mode())
+	if err != nil {
+		return err
+	}
+
+	directory, _ := os.Open(source)
+
+	objects, err := directory.Readdir(-1)
+
+	for _, obj := range objects {
+
+		sourcefilepointer := source + "/" + obj.Name()
+
+		destinationfilepointer := dest + "/" + obj.Name()
+
+		if obj.IsDir() {
+			// create sub-directories - recursively
+			err = CopyDir(sourcefilepointer, destinationfilepointer)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			// perform copy
+			err = CopyFile(sourcefilepointer, destinationfilepointer)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return
 }
 
 func clear() {
@@ -162,7 +268,7 @@ func clear() {
 }
 
 func locate(nome string) {
-	paf := ""
+	var paf string
 	fnd := false
 	dir, _ := os.Getwd()
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
