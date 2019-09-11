@@ -18,7 +18,16 @@ var casa string
 func cd(caminho string) {
 	// cd
 	x := false
-	p := strings.Split(caminho, "/")
+	f := strings.Split(strings.Replace(caminho, " ", "", 2), "\\")
+	n := true
+	j := f[0]
+	if j == caminho {
+		n = false
+	}
+	for i := 1; i < len(f); i++ {
+		j += " " + f[i]
+	}
+	p := strings.Split(j, "/")
 
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
@@ -28,7 +37,12 @@ func cd(caminho string) {
 				x = true
 				break
 			}
+		} else if n {
+			if strings.HasPrefix(arq[i].Name(), f[0]) {
+				os.Chdir(myd + "/" + j)
+			}
 		} else {
+
 			if strings.HasSuffix(arq[i].Name(), p[0]) {
 				x = true
 				break
@@ -42,6 +56,8 @@ func cd(caminho string) {
 		os.Chdir(myd + "/" + caminho)
 	} else if x == false {
 		os.Chdir(caminho)
+	} else if n {
+		os.Chdir(myd + "/" + caminho)
 	}
 
 }
@@ -64,6 +80,7 @@ func ls(parametro string) {
 	}
 
 	dir, _ := os.Getwd()
+
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
 		log.Fatal(erro)
@@ -165,15 +182,19 @@ func rmdir(pasta string) {
 }
 
 func mkfile(arquivo string) {
-	dir, _ := os.Getwd()
-	_, err := os.Stat(dir + "/" + arquivo)
+	// dir, _ := os.Getwd()
+	_, err := os.Stat(arquivo)
 	if err != nil {
 		if os.IsNotExist(err) {
 			os.Create(arquivo)
-		} else if os.IsExist(err) {
-			println("ja existe")
+			println("Ok")
 		}
+	} else {
+
+		fmt.Println(err)
+		// println("bug")
 	}
+
 }
 
 func rmfile(arquivo string) {
@@ -300,8 +321,15 @@ func selecionaComando(entrada []string) {
 		str2 = entrada[1]
 	}
 	if len(entrada) > 2 {
-		str3 = entrada[2]
+		for i := 2; i < len(entrada); i++ {
+			if i < len(entrada) {
+				str2 += " " + entrada[i]
+			}
+		}
 	}
+	if len(entrada) > 2 {
+		str3 = entrada[2]
+	} // problema conflito mv e cd
 
 	switch str {
 	case "cd":
@@ -334,6 +362,7 @@ func selecionaComando(entrada []string) {
 }
 
 func main() {
+
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
