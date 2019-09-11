@@ -18,19 +18,24 @@ var casa string
 func cd(caminho string) {
 	// cd
 	x := false
-	f := strings.Split(strings.Replace(caminho, " ", "", 2), "\\")
 	n := true
+
+	f := strings.Split(strings.Replace(caminho, " ", "", 2), "\\")
 	j := f[0]
+
 	if j == caminho {
 		n = false
 	}
+
 	for i := 1; i < len(f); i++ {
 		j += " " + f[i]
 	}
+
 	p := strings.Split(j, "/")
 
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
+
 	for i := 0; i < len(arq); i++ {
 		if p[0] == "" {
 			if len(p) > 1 && strings.HasSuffix(arq[i].Name(), p[1]) {
@@ -38,7 +43,7 @@ func cd(caminho string) {
 				break
 			}
 		} else if n {
-			if strings.HasPrefix(arq[i].Name(), f[0]) {
+			if strings.HasPrefix(arq[i].Name(), f[0]) || strings.HasPrefix(arq[i].Name(), p[0]) {
 				os.Chdir(myd + "/" + j)
 			}
 		} else {
@@ -316,27 +321,28 @@ func locate(nome string) {
 func selecionaComando(entrada []string) {
 	str := entrada[0]
 	str2 := ""
-	str3 := ""
 	if len(entrada) > 1 {
 		str2 = entrada[1]
 	}
-	if len(entrada) > 2 {
-		for i := 2; i < len(entrada); i++ {
-			if i < len(entrada) {
-				str2 += " " + entrada[i]
-			}
-		}
-	}
-	if len(entrada) > 2 {
-		str3 = entrada[2]
-	} // problema conflito mv e cd
 
 	switch str {
 	case "cd":
+		if len(entrada) > 2 {
+			for i := 2; i < len(entrada); i++ {
+				if i < len(entrada) {
+					str2 += " " + entrada[i]
+				}
+			}
+		}
+
 		cd(str2)
 	case "ls":
 		ls(str2)
 	case "mv":
+		str3 := ""
+		if len(entrada) > 2 {
+			str3 = entrada[2]
+		} // problema conflito mv e cd
 		mv(str2, str3)
 	case "cat":
 		cat(str2)
@@ -355,6 +361,10 @@ func selecionaComando(entrada []string) {
 	case "mkfile":
 		mkfile(str2)
 	case "copy":
+		str3 := ""
+		if len(entrada) > 2 {
+			str3 = entrada[2]
+		} // problema conflito mv e cd
 		copy(str2, str3)
 	default:
 		println("comando invalido")
