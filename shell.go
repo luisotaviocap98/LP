@@ -20,7 +20,7 @@ func cd(caminho string) {
 	x := false
 	n := true
 
-	f := strings.Split(strings.Replace(caminho, " ", "", 2), "\\")
+	f := strings.Split(strings.Replace(caminho, " ", "", len(caminho)), "\\")
 	j := f[0]
 
 	if j == caminho {
@@ -32,7 +32,7 @@ func cd(caminho string) {
 	}
 
 	p := strings.Split(j, "/")
-
+	fmt.Println(f, j, p)
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
 
