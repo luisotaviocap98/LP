@@ -9,7 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -32,7 +34,7 @@ func cd(caminho string) {
 	}
 
 	p := strings.Split(j, "/")
-	fmt.Println(f, j, p)
+
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
 
@@ -61,8 +63,6 @@ func cd(caminho string) {
 		os.Chdir(myd + "/" + caminho)
 	} else if x == false {
 		os.Chdir(caminho)
-	} else if n {
-		os.Chdir(myd + "/" + caminho)
 	}
 
 }
@@ -163,10 +163,20 @@ func cat(arquivo string) {
 	fmt.Printf("File contents:\n%s", content)
 }
 
-func man() {
+func man(arquivo string) {
 	// man
-	// content, _ := ioutil.ReadFile(arquivo)
-	// fmt.Printf("File contents:\n%s", content)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("No caller information")
+	}
+
+	if arquivo == "" {
+		content, _ := ioutil.ReadFile(path.Dir(filename) + "/programa.txt")
+		fmt.Printf("File contents:\n%s", content)
+	} else {
+		content, _ := ioutil.ReadFile(path.Dir(filename) + "/" + arquivo + ".txt")
+		fmt.Printf("File contents:\n%s", content)
+	}
 }
 
 func mkdir(pasta string) {
@@ -347,7 +357,7 @@ func selecionaComando(entrada []string) {
 	case "cat":
 		cat(str2)
 	case "man":
-		man()
+		man(str2)
 	case "mkdir":
 		mkdir(str2)
 	case "rmdir":
