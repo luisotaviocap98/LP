@@ -18,7 +18,6 @@ import (
 var casa string
 
 func cd(caminho string) {
-	// cd
 	x := false
 	n := true
 
@@ -64,7 +63,6 @@ func cd(caminho string) {
 	} else if x == false {
 		os.Chdir(caminho)
 	}
-
 }
 
 func leftjust(s string, n int, fill string) string {
@@ -72,8 +70,6 @@ func leftjust(s string, n int, fill string) string {
 }
 
 func ls(parametro string) {
-	// ls
-	// parametros : -valid, - hidden, - dirs, -files, -sortasc, -sortdesc, full
 	cmd := exec.Command("stty", "size")
 	cmd.Stdin = os.Stdin
 	out, _ := cmd.Output()
@@ -146,7 +142,6 @@ func ls(parametro string) {
 }
 
 func mv(origem, destino string) {
-	// mv
 	src, _ := os.Stat(origem)
 	if !src.IsDir() {
 		CopyFile(origem, destino)
@@ -154,21 +149,15 @@ func mv(origem, destino string) {
 		CopyDir(origem, destino)
 	}
 	os.RemoveAll(origem)
-
 }
 
 func cat(arquivo string) {
-	// cat
 	content, _ := ioutil.ReadFile(arquivo)
 	fmt.Printf("File contents:\n%s", content)
 }
 
 func man(arquivo string) {
-	// man
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
-	}
+	_, filename, _, _ := runtime.Caller(0)
 
 	if arquivo == "" {
 		content, _ := ioutil.ReadFile(path.Dir(filename) + "/programa.txt")
@@ -180,13 +169,11 @@ func man(arquivo string) {
 }
 
 func mkdir(pasta string) {
-	// mkdir
 	newpath := filepath.Join(pasta, "")
 	os.MkdirAll(newpath, os.ModePerm)
 }
 
 func rmdir(pasta string) {
-	// rmdir
 	file, _ := os.Open(pasta)
 	fi, _ := file.Stat()
 	if fi.IsDir() {
@@ -194,22 +181,19 @@ func rmdir(pasta string) {
 	} else {
 		println(pasta, "não é diretorio")
 	}
+	// validar para diretorio inexistente
 }
 
 func mkfile(arquivo string) {
-	// dir, _ := os.Getwd()
 	_, err := os.Stat(arquivo)
 	if err != nil {
+		fmt.Println(os.IsNotExist(err))
 		if os.IsNotExist(err) {
 			os.Create(arquivo)
-			println("Ok")
 		}
 	} else {
-
-		fmt.Println(err)
-		// println("bug")
+		fmt.Println("arquivo existente")
 	}
-
 }
 
 func rmfile(arquivo string) {
@@ -220,6 +204,7 @@ func rmfile(arquivo string) {
 	} else {
 		os.Remove(arquivo)
 	}
+	// validar para arquivo inexistente
 }
 
 func copy(origem, destino string) {
@@ -229,7 +214,6 @@ func copy(origem, destino string) {
 	} else {
 		CopyDir(origem, destino)
 	}
-
 }
 
 func CopyFile(source string, dest string) (err error) {
@@ -299,7 +283,6 @@ func CopyDir(source string, dest string) (err error) {
 }
 
 func clear() {
-	// clear
 	fmt.Print("\033[H\033[2J")
 }
 
@@ -382,7 +365,6 @@ func selecionaComando(entrada []string) {
 }
 
 func main() {
-
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
