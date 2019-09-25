@@ -18,8 +18,7 @@ import (
 var casa string
 
 func cd(caminho string) {
-	x := false
-	n := true
+	x, n := false, true
 
 	f := strings.Split(strings.Replace(caminho, " ", "", len(caminho)), "\\")
 	j := f[0]
@@ -69,29 +68,21 @@ func leftjust(s string, n int, fill string) string {
 	return s + strings.Repeat(fill, n)
 }
 
-func ls(parametro string) {
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, _ := cmd.Output()
+func recursiveParam(original []os.FileInfo, files, parametro []string) {
+	//remover recursivo os parametros
+	fmt.Println("seus comandos", parametro)
 
-	x, tam := 1, 0
-	for i := len(out) - 2; i >= 3; i-- {
-		tam += (int(out[i]) - 48) * x
-		x = x * 10
+	if len(parametro) > 1 {
+		parametro = parametro[1:len(parametro)] // Truncate slice.
 	}
-
-	dir, _ := os.Getwd()
-
-	arquivos, erro := ioutil.ReadDir(dir)
-	if erro != nil {
-		log.Fatal(erro)
-	}
-	cont := 0
+	fmt.Println("novo comandos", parametro)
 
 	// if parametro == "-dirs" {
 	// onlyd := true
+	// fileInfo.IsDir()
 	// } else if parametro == "-files" {
 	// onlyf := true
+	// !=fileInfo.IsDir()
 	// } else if parametro == "-full" {
 	// file, _ := os.Open(arquivos[i].Name())
 	// defer file.Close()
@@ -113,19 +104,50 @@ func ls(parametro string) {
 	// fmt.Printf("System interface type: %T\n", fileInfo.Sys())
 	// fmt.Printf("System info: %+v\n\n", fileInfo.Sys())
 	// }
-	// if parametro == "sort"{
+	// if parametro == "sortasc"{
 	// strs := []string{"c", "a", "b"}
 	// sort.Strings(strs)
 	// fmt.Println("Strings:", strs)
-	// reverso sort.Sort(sort.Reverse(strSlice[:]))
 	// }
+	// if parametro == "sortdesc"{
+	//  sort.Sort(sort.Reverse(strSlice[:]))
+	// }
+	// if parametro == "hidden"{
 	// unix/linux file or directory that starts with . is hidden
 	// if filename[0:1] == "." {
 	// return true, nil
-	//
 	// }
+	// }
+}
+
+func ls(parametro []string) {
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, _ := cmd.Output()
+
+	//espacar nomes listados
+	x, tam := 1, 0
+	for i := len(out) - 2; i >= 3; i-- {
+		tam += (int(out[i]) - 48) * x
+		x = x * 10
+	}
+
+	dir, _ := os.Getwd()
+	arquivos, erro := ioutil.ReadDir(dir)
+	if erro != nil {
+		log.Fatal(erro)
+	}
+
+	//copia para  vetor strings
+	archs := make([]string, len(arquivos))
+	for i := 0; i < len(arquivos); i++ {
+		archs[i] = arquivos[i].Name()
+	}
+
+	recursiveParam(arquivos, archs, parametro)
 
 	if len(arquivos) > 0 {
+		cont := 0
 
 		for i := 0; i < len(arquivos); i++ {
 			st := arquivos[i].Name()
@@ -330,12 +352,12 @@ func selecionaComando(entrada []string) {
 
 		cd(str2)
 	case "ls":
-		ls(str2)
+		ls(entrada[1:])
 	case "mv":
 		str3 := ""
 		if len(entrada) > 2 {
 			str3 = entrada[2]
-		} // problema conflito mv e cd
+		}
 		mv(str2, str3)
 	case "cat":
 		cat(str2)
@@ -357,8 +379,10 @@ func selecionaComando(entrada []string) {
 		str3 := ""
 		if len(entrada) > 2 {
 			str3 = entrada[2]
-		} // problema conflito mv e cd
+		}
 		copy(str2, str3)
+	case "":
+		fmt.Printf("")
 	default:
 		println("comando invalido")
 	}
@@ -370,6 +394,7 @@ func main() {
 		log.Fatal(err)
 	}
 	casa = usr.HomeDir
+
 	// pegar o comando digitado
 	dir, _ := os.Getwd()
 	fmt.Printf(dir + "$ ")
