@@ -17,13 +17,13 @@ import (
 
 var casa string
 
-func cd(caminho string) {
+func cd(caminho string) { //----------------------------------validado
 	x, n := false, true
 
 	f := strings.Split(strings.Replace(caminho, " ", "", len(caminho)), "\\")
 	j := f[0]
 
-	if j == caminho {
+	if j == caminho { //caminho nao possui nome composto
 		n = false
 	}
 
@@ -31,36 +31,42 @@ func cd(caminho string) {
 		j += " " + f[i]
 	}
 
-	p := strings.Split(j, "/")
+	p := strings.Split(j, "/") //separar niveis de diretorio
 
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
 
 	for i := 0; i < len(arq); i++ {
 		if p[0] == "" {
-			if len(p) > 1 && strings.HasSuffix(arq[i].Name(), p[1]) {
+			if len(p) > 1 && strings.HasSuffix(arq[i].Name(), p[1]) { //identifica se o caminho desejado existe no diretorio atual
 				x = true
 				break
 			}
-		} else if n {
-			if strings.HasPrefix(arq[i].Name(), f[0]) || strings.HasPrefix(arq[i].Name(), p[0]) {
+		} else if n { //verifica se o diretorio tem nome composto
+			if strings.HasPrefix(arq[i].Name(), f[0]) || strings.HasPrefix(arq[i].Name(), p[0]) { //identifica se o caminho desejado existe no diretorio atual
 				os.Chdir(myd + "/" + j)
 			}
 		} else {
 
-			if strings.HasSuffix(arq[i].Name(), p[0]) {
+			if strings.HasSuffix(arq[i].Name(), p[0]) { //identifica se o caminho desejado existe no diretorio atual
 				x = true
 				break
 			}
 		}
 	}
 
-	if caminho == "~" || caminho == "" {
+	if caminho == "~" || caminho == "" { //voltar para home
 		os.Chdir(casa)
-	} else if x || caminho == ".." {
-		os.Chdir(myd + "/" + caminho)
-	} else if x == false {
-		os.Chdir(caminho)
+	} else if x || caminho == ".." { //ir diretorio a baixo ou diretorio a cima
+		new := os.Chdir(myd + "/" + caminho)
+		if new != nil {
+			fmt.Println("caminho inexistente")
+		}
+	} else if x == false { //mudar totalmente de diretorio
+		new := os.Chdir(caminho)
+		if new != nil {
+			fmt.Println("caminho inexistente")
+		}
 	}
 }
 
@@ -68,12 +74,11 @@ func leftjust(s string, n int, fill string) string {
 	return s + strings.Repeat(fill, n)
 }
 
-func recursiveParam(original []os.FileInfo, files, parametro []string) {
-	//remover recursivo os parametros
+func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
 	fmt.Println("seus comandos", parametro)
 
 	if len(parametro) > 1 {
-		parametro = parametro[1:len(parametro)] // Truncate slice.
+		parametro = parametro[1:len(parametro)]
 	}
 	fmt.Println("novo comandos", parametro)
 
@@ -120,7 +125,7 @@ func recursiveParam(original []os.FileInfo, files, parametro []string) {
 	// }
 }
 
-func ls(parametro []string) {
+func ls(parametro []string) { //----------------------------------validado
 	cmd := exec.Command("stty", "size")
 	cmd.Stdin = os.Stdin
 	out, _ := cmd.Output()
@@ -138,78 +143,125 @@ func ls(parametro []string) {
 		log.Fatal(erro)
 	}
 
-	//copia para  vetor strings
+	//copia para vetor strings
 	archs := make([]string, len(arquivos))
 	for i := 0; i < len(arquivos); i++ {
 		archs[i] = arquivos[i].Name()
 	}
 
+	//verificar se os parametros sao validos
+	num, atual := 0, 0
+	errados := make([]string, len(parametro))
+	validos := [...]string{"-dirs", "-files", "-full", "-valid", "-hidden", "-sortasc", "-sortdesc", " ", ""}
+	for i := 0; i < len(parametro); i++ {
+		for j := 0; j < len(validos); j++ {
+			if parametro[i] == validos[j] {
+				num += 1
+			}
+		}
+		if num != atual+1 {
+			errados[atual] = parametro[i] //detecta parametros invalidos
+		}
+		atual += 1
+	}
+	if num != len(parametro) {
+		fmt.Println("comandos invalidos : ", errados)
+	}
+
 	recursiveParam(arquivos, archs, parametro)
 
+	// imprime os nomes dos arquivos
 	if len(arquivos) > 0 {
 		cont := 0
 
 		for i := 0; i < len(arquivos); i++ {
 			st := arquivos[i].Name()
-			cont += len(arquivos[i].Name()) + 5
+			cont += len(arquivos[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
 			if cont < tam {
 				fmt.Printf(leftjust(st, 5, " "))
 			} else {
 				cont = 0
-				println()
+				fmt.Printf("\n" + leftjust(st, 5, " "))
 			}
 		}
-		println()
+		fmt.Printf("\n")
 	}
 }
 
-func mv(origem, destino string) {
-	src, _ := os.Stat(origem)
-	if !src.IsDir() {
-		CopyFile(origem, destino)
-	} else {
-		CopyDir(origem, destino)
-	}
+func mv(origem, destino string) { //----------------------------------validado
+	copy(origem, destino)
 	os.RemoveAll(origem)
 }
 
-func cat(arquivo string) {
-	content, _ := ioutil.ReadFile(arquivo)
-	fmt.Printf("File contents:\n%s", content)
-}
-
-func man(arquivo string) {
-	_, filename, _, _ := runtime.Caller(0)
-
-	if arquivo == "" {
-		content, _ := ioutil.ReadFile(path.Dir(filename) + "/programa.txt")
-		fmt.Printf("File contents:\n%s", content)
+func cat(arquivo string) { //----------------------------------validado
+	_, err := os.Open(arquivo)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("arquivo inexistente")
+		}
 	} else {
-		content, _ := ioutil.ReadFile(path.Dir(filename) + "/" + arquivo + ".txt")
-		fmt.Printf("File contents:\n%s", content)
+		conteudo, _ := ioutil.ReadFile(arquivo)
+		fmt.Printf("%s", conteudo)
 	}
 }
 
-func mkdir(pasta string) {
-	newpath := filepath.Join(pasta, "")
-	os.MkdirAll(newpath, os.ModePerm)
-}
+func man(arquivo string) { //----------------------------------validado
+	_, filename, _, _ := runtime.Caller(0) //pega nome o arquivo que chamou o executavel
 
-func rmdir(pasta string) {
-	file, _ := os.Open(pasta)
-	fi, _ := file.Stat()
-	if fi.IsDir() {
-		os.RemoveAll(pasta)
-	} else {
-		println(pasta, "não é diretorio")
+	num := 0
+	validos := [...]string{"cat", "ls", "clear", "cd", "man", "copy", "locate", "mkdir", "mkfile", "rmdir", "rmfile", "mv", ""}
+	for j := 0; j < len(validos); j++ {
+		if arquivo == validos[j] {
+			num += 1
+		}
 	}
-	// validar para diretorio inexistente
+
+	if num == 1 {
+		if arquivo == "" {
+			content, _ := ioutil.ReadFile(path.Dir(filename) + "/programa.txt")
+			fmt.Printf("%s", content)
+		} else {
+			content, _ := ioutil.ReadFile(path.Dir(filename) + "/" + arquivo + ".txt")
+			fmt.Printf("%s", content)
+		}
+	} else {
+		fmt.Println("comando invalido")
+	}
+
 }
 
-func mkfile(arquivo string) {
+func mkdir(pasta string) { //----------------------------------validado
+	_, err := os.Open(pasta)
+	if err != nil {
+		if os.IsNotExist(err) {
+			newpath := filepath.Join(pasta, "")
+			os.MkdirAll(newpath, os.ModePerm)
+		}
+	} else {
+		fmt.Println("arquivo existente")
+	}
+
+}
+
+func rmdir(pasta string) { //----------------------------------validado
+	file, err := os.Open(pasta)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("arquivo inexistente")
+		}
+	} else {
+		fi, _ := file.Stat()
+		if fi.IsDir() {
+			os.RemoveAll(pasta)
+		} else {
+			println(pasta, "não é diretorio")
+		}
+	}
+}
+
+func mkfile(arquivo string) { //----------------------------------validado
 	_, err := os.Stat(arquivo)
 	if err != nil {
-		fmt.Println(os.IsNotExist(err))
 		if os.IsNotExist(err) {
 			os.Create(arquivo)
 		}
@@ -218,23 +270,41 @@ func mkfile(arquivo string) {
 	}
 }
 
-func rmfile(arquivo string) {
-	file, _ := os.Open(arquivo)
-	fi, _ := file.Stat()
-	if fi.IsDir() {
-		println("isto nao é um arquivo")
+func rmfile(arquivo string) { //----------------------------------validado
+	file, err := os.Open(arquivo)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("arquivo inexistente")
+		}
 	} else {
-		os.Remove(arquivo)
+		fi, _ := file.Stat()
+		if fi.IsDir() {
+			fmt.Println("isto nao é um arquivo")
+		} else {
+			os.Remove(arquivo)
+		}
 	}
-	// validar para arquivo inexistente
 }
 
-func copy(origem, destino string) {
+func copy(origem, destino string) { //----------------------------------validado
 	src, _ := os.Stat(origem)
-	if !src.IsDir() {
-		CopyFile(origem, destino)
+	_, err := os.Open(destino)
+	if err != nil { //destino nao existe
+		if !src.IsDir() {
+			CopyFile(origem, destino)
+		} else {
+			CopyDir(origem, destino)
+		}
+
 	} else {
-		CopyDir(origem, destino)
+		next, _ := os.Stat(destino)
+		if !src.IsDir() && !next.IsDir() {
+			CopyFile(origem, destino)
+		} else if !src.IsDir() && next.IsDir() {
+			CopyFile(origem, destino+"/"+origem)
+		} else {
+			CopyDir(origem, destino)
+		}
 	}
 }
 
@@ -312,87 +382,109 @@ func locate(nome string) {
 	var paf string
 	fnd := false
 	dir, _ := os.Getwd()
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, nome) {
 			paf = path
 			fnd = true
-			return filepath.SkipDir
+			return io.EOF
 		}
 		return nil
 	})
-	if err != nil {
-		log.Println(err)
-	}
+
 	if fnd {
-		println(paf)
+		fmt.Println("arquivo encontrado em \n" + paf)
 	} else {
-		println("nao encontrado")
+		fmt.Println("arquivo nao encontrado")
 	}
+}
+
+func validacao(palavras ...string) bool {
+	for _, val := range palavras {
+		if val == "" {
+			fmt.Println("parametros invalidos")
+			return false
+		}
+	}
+	return true
+}
+
+func qntparams(num, tam int) bool {
+	if tam > num { //len() > num
+		fmt.Println("quantidade de parametros invalida")
+		return false
+	}
+	return true
 }
 
 func selecionaComando(entrada []string) {
 	str := entrada[0]
-	str2 := ""
+	str2, str3 := "", ""
 	if len(entrada) > 1 {
 		str2 = entrada[1]
+	}
+	if len(entrada) > 2 {
+		str3 = entrada[2]
 	}
 
 	switch str {
 	case "cd":
-		if len(entrada) > 2 {
-			for i := 2; i < len(entrada); i++ {
-				if i < len(entrada) {
-					str2 += " " + entrada[i]
-				}
-			}
+		if qntparams(2, len(entrada)) {
+			cd(str2)
 		}
-
-		cd(str2)
 	case "ls":
-		ls(entrada[1:])
+		if qntparams(9, len(entrada)) {
+			ls(entrada[1:])
+		}
 	case "mv":
-		str3 := ""
-		if len(entrada) > 2 {
-			str3 = entrada[2]
+		if validacao(str2, str3) && qntparams(3, len(entrada)) {
+			mv(str2, str3)
 		}
-		mv(str2, str3)
 	case "cat":
-		cat(str2)
-	case "man":
-		man(str2)
-	case "mkdir":
-		mkdir(str2)
-	case "rmdir":
-		rmdir(str2)
-	case "clear":
-		clear()
-	case "locate":
-		locate(str2)
-	case "rmfile":
-		rmfile(str2)
-	case "mkfile":
-		mkfile(str2)
-	case "copy":
-		str3 := ""
-		if len(entrada) > 2 {
-			str3 = entrada[2]
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			cat(str2)
 		}
-		copy(str2, str3)
+	case "man":
+		if qntparams(2, len(entrada)) {
+			man(str2)
+		}
+	case "mkdir":
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			mkdir(str2)
+		}
+	case "rmdir":
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			rmdir(str2)
+		}
+	case "clear":
+		if qntparams(1, len(entrada)) {
+			clear()
+		}
+	case "locate":
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			locate(str2)
+		}
+	case "rmfile":
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			rmfile(str2)
+		}
+	case "mkfile":
+		if validacao(str2) && qntparams(2, len(entrada)) {
+			mkfile(str2)
+		}
+	case "copy":
+		if validacao(str2, str3) && qntparams(3, len(entrada)) {
+			copy(str2, str3)
+		}
 	case "":
 		fmt.Printf("")
 	default:
-		println("comando invalido")
+		fmt.Println("comando invalido")
 	}
 }
 
 func main() {
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
+	//descobrir nome da pasta Desktop / Area de Trabalho
+	usr, _ := user.Current()
 	casa = usr.HomeDir
 
 	// pegar o comando digitado
@@ -407,9 +499,8 @@ func main() {
 			os.Exit(0)
 		}
 
-		j := strings.Split(s, " ")
-
-		selecionaComando(j)
+		cmd := strings.Split(strings.Replace(s, "\\ ", "\\", len(s)), " ") //separa os argumentos
+		selecionaComando(cmd)
 
 		dir2, _ := os.Getwd()
 		fmt.Printf(dir2 + "$ ")
