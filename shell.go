@@ -17,13 +17,13 @@ import (
 
 var casa string
 
-func cd(caminho string) { //----------------------------------validado
+func manipulate(rota string) ([]string, string, []string, bool, bool) {
 	x, n := false, true
 
-	f := strings.Split(strings.Replace(caminho, " ", "", len(caminho)), "\\")
+	f := strings.Split(strings.Replace(rota, " ", "", len(rota)), "\\")
 	j := f[0]
 
-	if j == caminho { //caminho nao possui nome composto
+	if j == rota { //caminho nao possui nome composto
 		n = false
 	}
 
@@ -33,24 +33,38 @@ func cd(caminho string) { //----------------------------------validado
 
 	p := strings.Split(j, "/") //separar niveis de diretorio
 
+	return f, j, p, x, n
+}
+
+func cd(caminho string) { //----------------------------------validado
+	f, j, p, x, n := manipulate(caminho)
+	muda := false
 	myd, _ := os.Getwd()
 	arq, _ := ioutil.ReadDir(myd)
 
 	for i := 0; i < len(arq); i++ {
-		if p[0] == "" {
+		if p[0] == "" { //diretorio "/dir", pode estar no diretorio atual ou ser outro diretorio
 			if len(p) > 1 && strings.HasSuffix(arq[i].Name(), p[1]) { //identifica se o caminho desejado existe no diretorio atual
+				muda = false
 				x = true
 				break
+			} else {
+				muda = true
 			}
 		} else if n { //verifica se o diretorio tem nome composto
+
 			if strings.HasPrefix(arq[i].Name(), f[0]) || strings.HasPrefix(arq[i].Name(), p[0]) { //identifica se o caminho desejado existe no diretorio atual
-				os.Chdir(myd + "/" + j)
+				muda = false
+			} else {
+				muda = true
 			}
 		} else {
-
 			if strings.HasSuffix(arq[i].Name(), p[0]) { //identifica se o caminho desejado existe no diretorio atual
+				muda = false
 				x = true
 				break
+			} else {
+				muda = true
 			}
 		}
 	}
@@ -63,9 +77,30 @@ func cd(caminho string) { //----------------------------------validado
 			fmt.Println("caminho inexistente")
 		}
 	} else if x == false { //mudar totalmente de diretorio
-		new := os.Chdir(caminho)
-		if new != nil {
-			fmt.Println("caminho inexistente")
+		if muda {
+			if n {
+				new := os.Chdir(j)
+				if new != nil {
+					fmt.Println("caminho inexistente")
+				}
+			} else {
+				new := os.Chdir(caminho)
+				if new != nil {
+					fmt.Println("caminho inexistente")
+				}
+			}
+		} else {
+			if n {
+				new := os.Chdir(myd + "/" + j)
+				if new != nil {
+					fmt.Println("caminho inexistente")
+				}
+			} else {
+				new := os.Chdir(myd + "/" + caminho)
+				if new != nil {
+					fmt.Println("caminho inexistente")
+				}
+			}
 		}
 	}
 }
@@ -194,6 +229,7 @@ func mv(origem, destino string) { //----------------------------------validado
 }
 
 func cat(arquivo string) { //----------------------------------validado
+	_, arquivo, _, _, _ = manipulate(arquivo)
 	_, err := os.Open(arquivo)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -231,6 +267,7 @@ func man(arquivo string) { //----------------------------------validado
 }
 
 func mkdir(pasta string) { //----------------------------------validado
+	_, pasta, _, _, _ = manipulate(pasta)
 	_, err := os.Open(pasta)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -244,6 +281,7 @@ func mkdir(pasta string) { //----------------------------------validado
 }
 
 func rmdir(pasta string) { //----------------------------------validado
+	_, pasta, _, _, _ = manipulate(pasta)
 	file, err := os.Open(pasta)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -260,6 +298,7 @@ func rmdir(pasta string) { //----------------------------------validado
 }
 
 func mkfile(arquivo string) { //----------------------------------validado
+	_, arquivo, _, _, _ = manipulate(arquivo)
 	_, err := os.Stat(arquivo)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -271,6 +310,7 @@ func mkfile(arquivo string) { //----------------------------------validado
 }
 
 func rmfile(arquivo string) { //----------------------------------validado
+	_, arquivo, _, _, _ = manipulate(arquivo)
 	file, err := os.Open(arquivo)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -287,6 +327,8 @@ func rmfile(arquivo string) { //----------------------------------validado
 }
 
 func copy(origem, destino string) { //----------------------------------validado
+	_, origem, _, _, _ = manipulate(origem)
+	_, destino, _, _, _ = manipulate(destino)
 	src, _ := os.Stat(origem)
 	_, err := os.Open(destino)
 	if err != nil { //destino nao existe
@@ -379,6 +421,7 @@ func clear() {
 }
 
 func locate(nome string) {
+	_, nome, _, _, _ = manipulate(nome)
 	var paf string
 	fnd := false
 	dir, _ := os.Getwd()
