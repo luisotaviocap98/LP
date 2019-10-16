@@ -124,11 +124,28 @@ func imprimir(dados []string) {
 		x = x * 10
 	}
 
-	if len(dados) > 0 {
+	var copy []string
+
+	alert := 0
+
+	// elimina dados duplicados
+	for i := 0; i < len(dados); i++ {
+		alert = 0
+		for j := 0; j < len(copy); j++ {
+			if dados[i] == copy[j] {
+				alert = 1
+			}
+		}
+		if alert == 0 {
+			copy = append(copy, dados[i])
+		}
+	}
+
+	if len(copy) > 0 {
 		cont := 0
-		for i := 0; i < len(dados); i++ {
-			st := dados[i]
-			cont += len(dados[i]) + 5 //verifica se o nome do arquivo cabe na tela
+		for i := 0; i < len(copy); i++ {
+			st := copy[i]
+			cont += len(copy[i]) + 5 //verifica se o nome do arquivo cabe na tela
 			if cont < tam {
 				fmt.Printf(leftjust(st, 5, " "))
 			} else {
@@ -153,10 +170,10 @@ func recursiveParam(original []os.FileInfo, files, parametro []string) { //remov
 		}
 	}
 
-	if qtdParamUtil > 2 {
-		fmt.Println("Parâmetros inválidos")
-		return
-	}
+	// if qtdParamUtil > 2 {
+	// 	fmt.Println("Parâmetros inválidos")
+	// 	return
+	// }
 
 	// ls padrão ou ls com ordenação
 	if qtdParamUtil == 0 || (qtdParamUtil == 1 && (parametro[0] == "-sortasc" || parametro[0] == "-sortdesc")) { // padrão, lista todos exceto ocultas
