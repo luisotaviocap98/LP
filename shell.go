@@ -124,17 +124,6 @@ func imprimir(dados []string) {
 		x = x * 10
 	}
 
-	// fmt.Println("seus comandos", parametro) // meus comandos
-	// fmt.Println("seus files", files)        // tenho os dados
-
-	// qtdParamUtil := 0
-	// for i := 0; i < len(parametro); i++ {
-	// 	if parametro[i] != "" {
-	// 		fmt.Println(parametro)
-	// 		qtdParamUtil += 1
-	// 	}
-	// }
-
 	if len(dados) > 0 {
 		cont := 0
 		for i := 0; i < len(dados); i++ {
@@ -153,235 +142,177 @@ func imprimir(dados []string) {
 
 func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
 
-	// cmd := exec.Command("stty", "size")
-	// cmd.Stdin = os.Stdin
-	// out, _ := cmd.Output()
+	var str []string
 
-	//espacar nomes listados
-	// x, tam := 1, 0
-	// for i := len(out) - 2; i >= 3; i-- {
-	// 	tam += (int(out[i]) - 48) * x
-	// 	x = x * 10
-	// }
-
-	// fmt.Println("seus comandos", parametro) // meus comandos
-	// fmt.Println("seus files", files)        // tenho os dados
-
+	// verifico a quantidade de parâmetros útil
 	qtdParamUtil := 0
 	for i := 0; i < len(parametro); i++ {
 		if parametro[i] != "" {
-			fmt.Println(parametro)
+			// fmt.Println(parametro)
 			qtdParamUtil += 1
 		}
 	}
 
-	var str []string
+	if qtdParamUtil > 2 {
+		fmt.Println("Parâmetros inválidos")
+		return
+	}
 
-	if qtdParamUtil == 0 {
-		str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
-		str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
-		for i := 0; i < len(original); i++ {
-			str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+	// ls padrão ou ls com ordenação
+	if qtdParamUtil == 0 || (qtdParamUtil == 1 && (parametro[0] == "-sortasc" || parametro[0] == "-sortdesc")) { // padrão, lista todos exceto ocultas
+		if qtdParamUtil == 1 {
+			if parametro[0] == "-sortasc" {
+				sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+			}
+
+			if parametro[0] == "-sortdesc" {
+				sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+			}
 		}
-
-	} else {
+		for i := 0; i < len(original); i++ {
+			match, _ := regexp.MatchString("^\\..*", original[i].Name())
+			if !match {
+				str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+			}
+		}
+	} else { // se não for somente ls básico, então faremos tratamento de ls complexo
 
 		for i := 0; i < len(parametro); i++ {
 
-			if parametro[i] == "-valid" {
+			// valid simples e com ordenação
+			if parametro[i] == "-valid" { //  não lista entradas implícitas (. e ..)
+				if len(parametro) == 2 {
+					if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+						sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+					}
+
+					if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+						sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+					}
+				}
+
 				for i := 0; i < len(original); i++ {
 					if original[i].Name() != "." || original[i].Name() != ".." {
 
 						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
 					}
 				}
-			}
+			} else {
 
-			if parametro[i] == "-hidden" {
-				// 	if original[i].Name() == "."* {
-				for i := 0; i < len(original); i++ {
-					match, _ := regexp.MatchString("^\\..*", original[i].Name())
-					if match {
+				// hidden simples e com ordenação
+				if parametro[i] == "-hidden" { //  lista entradas ocultas
+					if len(parametro) == 2 {
+						if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+						}
 
+						if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+						}
+					}
+
+					str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
+					str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
+					for i := 0; i < len(original); i++ {
 						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				} else {
+
+					// dirs simples e com ordenação
+					if parametro[i] == "-dirs" { // lista somente diretórios
+
+						if len(parametro) == 2 {
+							if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+								sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+							}
+
+							if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+								sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+							}
+						}
+
+						for i := 0; i < len(original); i++ {
+							if original[i].IsDir() {
+								// fmt.Print("teste")
+
+								str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+							}
+						}
+					} else {
+
+						// files simples e com ordenação
+						if parametro[i] == "-files" { //  lista somente arquivos
+							if len(parametro) == 2 {
+								if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+									sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+								}
+
+								if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+									sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+								}
+							}
+
+							for i := 0; i < len(original); i++ {
+								if !original[i].IsDir() {
+									str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+								}
+							}
+						} else {
+
+							// full simples e com ordenação
+							if parametro[i] == "-full" { //  lista todas as propriedades das entradas (date, size, owner,. . . )
+
+								if len(parametro) == 2 {
+									if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+									}
+
+									if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+									}
+								}
+
+								fmt.Println()
+
+								for i := 0; i < len(original); i++ {
+									match, _ := regexp.MatchString("^\\..*", original[i].Name())
+									if !match {
+										fmt.Print(original[i].Mode()) // permissões
+										fmt.Print("      ")
+										fmt.Print(original[i].ModTime()) // ultima modificação (tempo)
+										fmt.Print("      ")
+										fmt.Print(original[i].Size()) // tamanho do arquivo
+										fmt.Print("      ")
+										fmt.Println(original[i].Name()) // nome do arquivo
+
+									}
+								}
+								fmt.Println()
+
+							}
+						}
 					}
 				}
 			}
-
-			if parametro[i] == "-dirs" {
-				// 	if original[i].Name() == "."* {
-				for i := 0; i < len(original); i++ {
-					// match, _ := regexp.MatchString("\\..*", original[i].Name())
-					if original[i].IsDir() {
-
-						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-					}
-				}
-			}
-
-			if parametro[i] == "-files" {
-				// 	if original[i].Name() == "."* {
-				for i := 0; i < len(original); i++ {
-					// match, _ := regexp.MatchString("^[a-z]+\\..*", original[i].Name())
-					if !original[i].IsDir() {
-
-						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-					}
-				}
-			}
-
-			if parametro[i] == "-full" {
-				for i := 0; i < len(original); i++ {
-
-					fmt.Print(original[i].Mode()) // permissões
-					fmt.Print("      ")
-					fmt.Print(original[i].ModTime()) // ultima modificação (tempo)
-					fmt.Print("      ")
-					fmt.Print(original[i].Size()) // tamanho do arquivo
-					fmt.Print("      ")
-					fmt.Println(original[i].Name()) // nome do arquivo
-
-					// match, _ := regexp.MatchString("^[a-z]+\\..*", original[i].Name())
-
-					// str = append(str, string(original[i].Mode()))
-					// str = append(str, original[i].ModTime())
-
-					// str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-
-				}
-			}
-
-			if parametro[i] == "-sortasc" {
-				for i := 0; i < len(original); i++ {
-					str = append(str, original[i].Name())
-				}
-				// sort.Strings(str)
-				sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
-
-			}
-
-			if parametro[i] == "-sortdesc" {
-				for i := 0; i < len(original); i++ {
-					str = append(str, original[i].Name())
-				}
-				sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
-			}
-
-			// if parametro == "sortasc"{
-			// strs := []string{"c", "a", "b"}
-			// sort.Strings(strs)
-			// fmt.Println("Strings:", strs)
-			// }
-			// if parametro == "sortdesc"{
-			//  sort.Sort(sort.Reverse(strSlice[:]))
-			// }
-
 		}
 	}
 
-	imprimir(str)
+	// imprime os resultados
+	if len(str) > 0 {
+		fmt.Println()
+		imprimir(str)
+		fmt.Println()
+	}
 
-	// 	cont := 0
-	// 	for i := 0; i < len(original); i++ {
-	// 		st := original[i].Name()
-	// 		cont += len(original[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
-	// 		if cont < tam {
-	// 			fmt.Printf(leftjust(st, 5, " "))
-	// 		} else {
-	// 			cont = 0
-	// 			fmt.Printf("\n" + leftjust(st, 5, " "))
-	// 		}
-	// 	}
-	// 	fmt.Printf("\n")
-	// }
-
-	// fmt.Println("seus original", original)
-
-	// for i := len(files) - 2; i >= 3; i-- {
-	// 	files[i] = ""
-	// }
-
-	// for i
-	// files[0] = files[1]
-
-	// if len(parametro) > 1 { // pega o segundo comando
-	// 	parametro = parametro[1:len(parametro)]
-	// 	fmt.Println("novo comandos", parametro)
-	// }
-
-	// var data [3]string
-
-	// data[0]
-	// // for i := len(parametro) - 2; i >= 3; i-- {
-
-	// for
-
-	// if parametro == "-dirs" {
-	// onlyd := true
-	// fileInfo.IsDir()
-	// } else if parametro == "-files" {
-	// onlyf := true
-	// !=fileInfo.IsDir()
-	// } else if parametro == "-full" {
-	// file, _ := os.Open(arquivos[i].Name())
-	// defer file.Close()
-	// stat, _ := file.Stat()
-	// fmt.Printf("%s %v", st, stat.Size())
-	// err = os.Chown("test.txt", os.Getuid(), os.Getgid())
-	// if err != nil {
-	// log.Println(err)
-	// }
-	// fileInfo, err = os.Stat("test.txt")
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	// fmt.Println("File name:", fileInfo.Name())
-	// fmt.Println("Size in bytes:", fileInfo.Size())
-	// fmt.Println("Permissions:", fileInfo.Mode())
-	// fmt.Println("Last modified:", fileInfo.ModTime())
-	// fmt.Println("Is Directory: ", fileInfo.IsDir())
-	// fmt.Printf("System interface type: %T\n", fileInfo.Sys())
-	// fmt.Printf("System info: %+v\n\n", fileInfo.Sys())
-	// }
-	// if parametro == "sortasc"{
-	// strs := []string{"c", "a", "b"}
-	// sort.Strings(strs)
-	// fmt.Println("Strings:", strs)
-	// }
-	// if parametro == "sortdesc"{
-	//  sort.Sort(sort.Reverse(strSlice[:]))
-	// }
-	// if parametro == "hidden"{
-	// unix/linux file or directory that starts with . is hidden
-	// if filename[0:1] == "." {
-	// return true, nil
-	// }
-	// }
 }
 
 func ls(parametro []string) { //----------------------------------validado
-	// cmd := exec.Command("stty", "size")
-	// cmd.Stdin = os.Stdin
-	// out, _ := cmd.Output()
-
-	// //espacar nomes listados
-	// x, tam := 1, 0
-	// for i := len(out) - 2; i >= 3; i-- {
-	// 	tam += (int(out[i]) - 48) * x
-	// 	x = x * 10
-	// }
 
 	dir, _ := os.Getwd()
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
 		log.Fatal(erro)
 	}
-
-	// wd, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// parent, _ := filepath.Dir(wd)
 
 	//copia para vetor strings
 	archs := make([]string, len(arquivos))
@@ -406,29 +337,11 @@ func ls(parametro []string) { //----------------------------------validado
 	}
 	if num != len(parametro) {
 		fmt.Println("comandos invalidos : ", errados)
+	} else {
+
+		recursiveParam(arquivos, archs, parametro)
 	}
 
-	recursiveParam(arquivos, archs, parametro)
-
-	// imprime os nomes dos arquivos
-
-	// comentei aqui
-
-	// if len(arquivos) > 0 {
-	// 	cont := 0
-
-	// 	for i := 0; i < len(arquivos); i++ {
-	// 		st := arquivos[i].Name()
-	// 		cont += len(arquivos[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
-	// 		if cont < tam {
-	// 			fmt.Printf(leftjust(st, 5, " "))
-	// 		} else {
-	// 			cont = 0
-	// 			fmt.Printf("\n" + leftjust(st, 5, " "))
-	// 		}
-	// 	}
-	// 	fmt.Printf("\n")
-	// }
 }
 
 func mv(origem, destino string) { //----------------------------------validado
