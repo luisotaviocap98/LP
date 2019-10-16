@@ -591,7 +591,10 @@ func locate(nome string) {
 	fnd := false
 	dir, _ := os.Getwd()
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(path, nome) {
+		_, x, _, _, _ := manipulate(path)
+		j := strings.Split(x, "/")
+
+		if j[len(j)-1] == nome {
 			paf = path
 			fnd = true
 			return io.EOF
