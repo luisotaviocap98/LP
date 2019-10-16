@@ -1,0 +1,22 @@
+MAN(1)                 		Manual de Comandos		               MAN(1)
+
+NOME
+       man - uma interface para os manuais dos comandos disponiveis
+
+SINOPSE
+       man  [arquivo]
+
+	man é o paginador de manual do sistema. O argumento passado é o nome de 
+	um comando disponivel no programa e se refere ao arquivo manual desse argumento. 
+	É exibido no terminal em formato texto o arquivo manual do comando desejado.
+	Os comandos que possuem um arquivo manual são: cd, ls, man, clear, mkfile, 
+	mkdir, rmfile, rmdir, locate, copy, cat, mv. Os arquivos de manual podem 
+	incluir as seguintes seções:  NOME, SINOPSE, DESCRICAO, OPCOES, EXEMPLOS.
+
+EXEMPLOS
+       man ls
+           Exibe a página de manual para o item (programa) ls.
+
+       man cd
+           Exibe a página de manual para o item (programa) cd.
+

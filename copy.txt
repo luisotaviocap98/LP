@@ -1,0 +1,15 @@
+COPY(1)                            Comando                           COPY(1)
+
+NOME
+       copy - copia um arquivo ou diretorio 
+
+SINOPSE
+       copy [origem] [destino]
+
+DESCRICAO
+	O comando copy copia um arquivo/diretorio para outro. Caso 
+	ja exista o arquivo/diretorio destino é solicitado uma 
+	confirmação para sobreescrita. Para utilizar esse comando 
+	basta digitar: copy seguido pelos nomes dos arquivos/diretorios 
+	de origem e destino. Não são permitidos parametros adicionais. 
+      

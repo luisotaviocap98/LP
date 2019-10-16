@@ -111,6 +111,154 @@ func leftjust(s string, n int, fill string) string {
 	return s + strings.Repeat(fill, n)
 }
 
+func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
+
+	var str []string
+
+	// verifico a quantidade de parâmetros útil
+	qtdParamUtil := 0
+	for i := 0; i < len(parametro); i++ {
+		if parametro[i] != "" {
+			qtdParamUtil += 1
+		}
+	}
+
+	liberado := false
+
+	if qtdParamUtil > 2 {
+		fmt.Println("quantidade de parâmetros inválidos")
+		return
+	} else if qtdParamUtil == 2 {
+		if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" || parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+			liberado = true
+		} else {
+			fmt.Println("combinação de parametros não permitida")
+		}
+	} else {
+		liberado = true
+	}
+	if liberado {
+		// ls padrão ou ls com ordenação
+		if qtdParamUtil == 0 || (qtdParamUtil == 1 && (parametro[0] == "-sortasc" || parametro[0] == "-sortdesc")) { // padrão, lista todos exceto ocultas
+			if qtdParamUtil == 1 {
+				if parametro[0] == "-sortasc" {
+					sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+				}
+
+				if parametro[0] == "-sortdesc" {
+					sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+				}
+			}
+			for i := 0; i < len(original); i++ {
+				match, _ := regexp.MatchString("^\\..*", original[i].Name())
+				if !match {
+					str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+				}
+			}
+		} else { // se não for somente ls básico, então faremos tratamento de ls complexo
+
+			for i := 0; i < len(parametro); i++ {
+
+				// valid simples e com ordenação
+				if parametro[i] == "-valid" { //  não lista entradas implícitas (. e ..)
+
+					for i := 0; i < len(original); i++ {
+						if original[i].Name() != "." || original[i].Name() != ".." {
+							str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+						}
+					}
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+						}
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+						}
+					}
+				} else if parametro[i] == "-hidden" { //  lista entradas ocultas
+
+					str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
+					str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
+
+					for i := 0; i < len(original); i++ {
+						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+						}
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+						}
+					}
+				} else if parametro[i] == "-dirs" { // lista somente diretórios
+
+					for i := 0; i < len(original); i++ {
+						if original[i].IsDir() {
+							str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+						}
+					}
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+						}
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+						}
+					}
+				} else if parametro[i] == "-files" { //  lista somente arquivos
+
+					for i := 0; i < len(original); i++ {
+						if !original[i].IsDir() {
+							str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+						}
+					}
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+						}
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+						}
+					}
+				} else if parametro[i] == "-full" { //  lista todas as propriedades das entradas (date, size, owner,. . . )
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
+						}
+
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
+						}
+					}
+
+					for i := 0; i < len(original); i++ {
+						match, _ := regexp.MatchString("^\\..*", original[i].Name())
+						if !match {
+							fmt.Print(original[i].Mode()) // permissões
+							fmt.Print("      ")
+							fmt.Print(original[i].ModTime()) // ultima modificação (tempo)
+							fmt.Print("      ")
+							fmt.Print(original[i].Size()) // tamanho do arquivo
+							fmt.Print("      ")
+							fmt.Println(original[i].Name()) // nome do arquivo
+						}
+					}
+				}
+			}
+		}
+	}
+	// imprime os resultados
+	if len(str) > 0 {
+		imprimir(str)
+	}
+}
+
 func imprimir(dados []string) {
 
 	cmd := exec.Command("stty", "size")
@@ -157,170 +305,6 @@ func imprimir(dados []string) {
 	}
 }
 
-func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
-
-	var str []string
-
-	// verifico a quantidade de parâmetros útil
-	qtdParamUtil := 0
-	for i := 0; i < len(parametro); i++ {
-		if parametro[i] != "" {
-			// fmt.Println(parametro)
-			qtdParamUtil += 1
-		}
-	}
-
-	// if qtdParamUtil > 2 {
-	// 	fmt.Println("Parâmetros inválidos")
-	// 	return
-	// }
-
-	// ls padrão ou ls com ordenação
-	if qtdParamUtil == 0 || (qtdParamUtil == 1 && (parametro[0] == "-sortasc" || parametro[0] == "-sortdesc")) { // padrão, lista todos exceto ocultas
-		if qtdParamUtil == 1 {
-			if parametro[0] == "-sortasc" {
-				sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-			}
-
-			if parametro[0] == "-sortdesc" {
-				sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-			}
-		}
-		for i := 0; i < len(original); i++ {
-			match, _ := regexp.MatchString("^\\..*", original[i].Name())
-			if !match {
-				str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-			}
-		}
-	} else { // se não for somente ls básico, então faremos tratamento de ls complexo
-
-		for i := 0; i < len(parametro); i++ {
-
-			// valid simples e com ordenação
-			if parametro[i] == "-valid" { //  não lista entradas implícitas (. e ..)
-
-				for i := 0; i < len(original); i++ {
-					if original[i].Name() != "." || original[i].Name() != ".." {
-						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-					}
-				}
-
-				for p := 0; p < len(parametro); p++ {
-					if parametro[p] == "-sortasc" {
-						sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
-					}
-					if parametro[p] == "-sortdesc" {
-						sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
-					}
-				}
-			} else {
-
-				// hidden simples e com ordenação
-				if parametro[i] == "-hidden" { //  lista entradas ocultas
-
-					str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
-					str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
-
-					for i := 0; i < len(original); i++ {
-						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-					}
-
-					for p := 0; p < len(parametro); p++ {
-						if parametro[p] == "-sortasc" {
-							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
-						}
-						if parametro[p] == "-sortdesc" {
-							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
-						}
-					}
-				} else {
-
-					// dirs simples e com ordenação
-					if parametro[i] == "-dirs" { // lista somente diretórios
-
-						for i := 0; i < len(original); i++ {
-							if original[i].IsDir() {
-								// fmt.Print("teste")
-								str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-							}
-						}
-
-						for p := 0; p < len(parametro); p++ {
-							if parametro[p] == "-sortasc" {
-								sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
-							}
-							if parametro[p] == "-sortdesc" {
-								sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
-							}
-						}
-					} else {
-
-						// files simples e com ordenação
-						if parametro[i] == "-files" { //  lista somente arquivos
-
-							for i := 0; i < len(original); i++ {
-								if !original[i].IsDir() {
-									str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
-								}
-							}
-
-							for p := 0; p < len(parametro); p++ {
-								if parametro[p] == "-sortasc" {
-									sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
-								}
-								if parametro[p] == "-sortdesc" {
-									sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
-								}
-							}
-						} else {
-
-							// full simples e com ordenação
-							if parametro[i] == "-full" { //  lista todas as propriedades das entradas (date, size, owner,. . . )
-
-								for p := 0; p < len(parametro); p++ {
-									if parametro[p] == "-sortasc" {
-										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-									}
-
-									if parametro[p] == "-sortdesc" {
-										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-									}
-								}
-
-								fmt.Println()
-
-								for i := 0; i < len(original); i++ {
-									match, _ := regexp.MatchString("^\\..*", original[i].Name())
-									if !match {
-										fmt.Print(original[i].Mode()) // permissões
-										fmt.Print("      ")
-										fmt.Print(original[i].ModTime()) // ultima modificação (tempo)
-										fmt.Print("      ")
-										fmt.Print(original[i].Size()) // tamanho do arquivo
-										fmt.Print("      ")
-										fmt.Println(original[i].Name()) // nome do arquivo
-
-									}
-								}
-								fmt.Println()
-
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// imprime os resultados
-	if len(str) > 0 {
-		fmt.Println()
-		imprimir(str)
-		fmt.Println()
-	}
-
-}
-
 func ls(parametro []string) { //----------------------------------validado
 
 	dir, _ := os.Getwd()
@@ -360,8 +344,9 @@ func ls(parametro []string) { //----------------------------------validado
 }
 
 func mv(origem, destino string) { //----------------------------------validado
-	copy(origem, destino)
-	os.RemoveAll(origem)
+	if copy(origem, destino) {
+		os.RemoveAll(origem)
+	}
 }
 
 func cat(arquivo string) { //----------------------------------validado
@@ -411,7 +396,18 @@ func mkdir(pasta string) { //----------------------------------validado
 			os.MkdirAll(newpath, os.ModePerm)
 		}
 	} else {
-		fmt.Println("arquivo existente")
+		fmt.Println("arquivo existente, deseja continuar? [s | n]")
+		reader := bufio.NewReader(os.Stdin)
+		escolha, _ := reader.ReadString('\n')
+		escolha = strings.Replace(escolha, "\n", "", -1)
+		if escolha == "n" {
+			return
+		} else if escolha == "s" {
+			newpath := filepath.Join(pasta, "")
+			os.MkdirAll(newpath, os.ModePerm)
+		} else {
+			fmt.Println("opcao invalida")
+		}
 	}
 
 }
@@ -441,7 +437,17 @@ func mkfile(arquivo string) { //----------------------------------validado
 			os.Create(arquivo)
 		}
 	} else {
-		fmt.Println("arquivo existente")
+		fmt.Println("arquivo existente, deseja continuar? [s | n]")
+		reader := bufio.NewReader(os.Stdin)
+		escolha, _ := reader.ReadString('\n')
+		escolha = strings.Replace(escolha, "\n", "", -1)
+		if escolha == "n" {
+			return
+		} else if escolha == "s" {
+			os.Create(arquivo)
+		} else {
+			fmt.Println("opcao invalida")
+		}
 	}
 }
 
@@ -462,27 +468,50 @@ func rmfile(arquivo string) { //----------------------------------validado
 	}
 }
 
-func copy(origem, destino string) { //----------------------------------validado
+func copy(origem, destino string) bool { //----------------------------------validado
+	var sucesso error
 	_, origem, _, _, _ = manipulate(origem)
 	_, destino, _, _, _ = manipulate(destino)
-	src, _ := os.Stat(origem)
-	_, err := os.Open(destino)
-	if err != nil { //destino nao existe
-		if !src.IsDir() {
-			CopyFile(origem, destino)
-		} else {
-			CopyDir(origem, destino)
-		}
-
+	_, erro := os.Open(origem)
+	if erro != nil {
+		fmt.Println("origem inexistente")
 	} else {
-		next, _ := os.Stat(destino)
-		if !src.IsDir() && !next.IsDir() {
-			CopyFile(origem, destino)
-		} else if !src.IsDir() && next.IsDir() {
-			CopyFile(origem, destino+"/"+origem)
+		src, _ := os.Stat(origem)
+
+		_, err := os.Open(destino)
+		if err != nil { //destino nao existe
+			if !src.IsDir() {
+				sucesso = CopyFile(origem, destino)
+			} else {
+				sucesso = CopyDir(origem, destino)
+			}
+
 		} else {
-			CopyDir(origem, destino)
+			fmt.Println("arquivo destino ja existente, deseja continuar? [s | n]")
+			reader := bufio.NewReader(os.Stdin)
+			escolha, _ := reader.ReadString('\n')
+			escolha = strings.Replace(escolha, "\n", "", -1)
+			if escolha == "n" {
+				return false
+			} else if escolha == "s" {
+				next, _ := os.Stat(destino)
+				if !src.IsDir() && !next.IsDir() {
+					sucesso = CopyFile(origem, destino)
+				} else if !src.IsDir() && next.IsDir() {
+					sucesso = CopyFile(origem, destino+"/"+origem)
+				} else {
+					sucesso = CopyDir(origem, destino)
+				}
+			} else {
+				fmt.Println("opcao invalida")
+			}
+
 		}
+	}
+	if sucesso == nil {
+		return true
+	} else {
+		return false
 	}
 }
 
@@ -665,7 +694,10 @@ func main() {
 	//descobrir nome da pasta Desktop / Area de Trabalho
 	usr, _ := user.Current()
 	casa = usr.HomeDir
-
+	if len(os.Args) > 1 {
+		arg := os.Args[1]
+		cd(arg) //iniciar em um diretorio especifico
+	}
 	// pegar o comando digitado
 	dir, _ := os.Getwd()
 	fmt.Printf(dir + "$ ")

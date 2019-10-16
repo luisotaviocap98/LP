@@ -1,0 +1,16 @@
+MKDIR(1)                         Comando                        MKDIR(1)
+
+NOME
+       mkdir - cria diretorios
+
+SINOPSE
+       mkdir [diretorio]
+
+DESCRICAO
+	O comando mkdir permite criar um novo diretorio, usando o 
+	nome passado por parametro, mas não são criados sequencias 
+	de diretorios nem subdiretorios. Caso o diretorio ja exista 
+	é solicitado uma confirmação para sobreescrita. Para usar 
+	esse comando basta digitar: mkdir seguido pelo nome do 
+	diretorio. Não são permitidos parametros adicionais.
+       

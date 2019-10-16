@@ -1,0 +1,16 @@
+CD(1)                     Comando                    CD(1)
+
+NOME
+       cd - muda o diretorio corrente
+
+SINOPSE
+       cd [diretorio]
+
+DESCRICAO
+	O comando cd muda o diretorio atual, indo para 
+	o diretorio passado por parametro. É permitido 
+	mudar usando o nome absoluto ou relativo do 
+	diretorio. Para usar esse comando basta digitar: 
+	cd seguido pelo diretorio que se deseja ir. 
+	Não são permitidos parametros adicionais.
+       

@@ -1,0 +1,15 @@
+RMFILE(1)                            Comando                           RMFILE(1)
+
+NOME
+       rmfile - remove arquivos
+
+SINOPSE
+       rmfile [arquivo]
+
+DESCRICAO
+	O comando rmfile remove um arquivo especifico, que é passado por 
+	parametro. Só é possivel deletar arquivos existentes. Esse comando 
+	só remove arquivos simples, não removendo diretorios. Para usar 
+	esse comando basta digitar rmfile, seguido pelo nome do arquivo que 
+	se deseja remover. Não é possivel passar parametros adicionais além 
+	do nome do arquivo.

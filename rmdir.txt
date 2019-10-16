@@ -1,0 +1,15 @@
+RMDIR(1)                            Comando                           RMDIR(1)
+
+NOME
+       rmdir - remove diretorios
+
+SINOPSE
+       rmdir [diretorio]
+
+DESCRICAO
+       	O comando rmdir remove um diretorio especifico, que é passado por 
+	parametro. Só é possivel deletar diretorios existentes. Caso haja 
+	subdiretorios no diretorio passado, eles serão removidos recursivamente. 
+	Para usar esse comando basta digitar rmdir, seguido pelo nome do 
+	diretorio que se deseja remover. Não é possivel passar parametros 
+	adicionais além do nome do diretorio.

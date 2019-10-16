@@ -1,1 +1,15 @@
-move
+MV(1)                            Comando                           MV(1)
+
+NOME
+       mv - move arquivos e diretorios
+
+SINOPSE
+       mv [origem] [destino]
+
+DESCRICAO
+	O comando mv move o arquivo/diretorio da origem para o destino, 
+	ou renomeia o arquivo/direotorio de origem para o destino. 
+	Caso ja exista o arquivo de destino é solicitado uma confirmação 
+	para sobreescrita. Para usar esse comando basta digitar: mv seguido 
+	pelos nomes dos arquivo/diretorio de origem e o destino. Não são 
+	permitidos parametros adicionais.

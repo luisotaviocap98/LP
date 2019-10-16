@@ -1,0 +1,15 @@
+locate(1)                    Comando                  locate(1)
+
+NOME
+       locate - encontra um arquivo pelo seu nome
+
+SINOPSE
+       locate [arquivo]
+
+DESCRICAO
+	O comando loacte busca um arquivo a partir do 
+	diretorio atual de forma recursiva e retorna o 
+	caminho para o arquivo. Para usar esse comando 
+	basta digitar: ls seguido pelo no arquivo. Não 
+	são permitidos parametros adicionais.
+       

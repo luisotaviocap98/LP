@@ -1,0 +1,27 @@
+LS(1)                            Comando                           LS(1)
+
+NOME
+       ls - lista conteudo do diretorio atual 
+
+SINOPSE
+       ls [parametros]
+
+DESCRICAO
+	O comando ls lista os arquivos dentro do diretorio corrente, 
+	e tambem pode manipular as informações sobre esses arquivos 
+	de acordo com os parametros passados. É permitido a combinações 
+	de parametros, mas contem limitações, só é permitido passar até 
+	2 parametros, sendo que somente os parametros de ordenações podem 
+	ser combinados com os demais. Para usar esse comando basta digitar: 
+	ls seguido pelos parametros desejados.  Os parametros permitidos 
+	são: 
+	"-dirs" que lista somente diretorios, 
+	"-files" que lista somente arquivos, 
+	"-full" lista informações sobre os arquivos, 
+	"-valid" não lista os diretorios "." e "..", 
+	"-hidden" lista os arquivos visiveis e ocultos, 
+	"-sortasc" ordena os arquivos em ordem alfebetica crescente, 
+	"-sortdesc"ordena os arquivos em ordem alfebetica decrescente; 
+	caso não seja passado nenhum parametro, é listado os arquivos visiveis 
+	sem mostrar suas informações adicionais nem ordenar-los.
+       

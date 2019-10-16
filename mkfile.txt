@@ -1,0 +1,14 @@
+MKFILE(1)                         Comando                        MKFILE(1)
+
+NOME
+       mkfile - cria um arquivo
+
+SINOPSE
+       mkfile [arquivo]
+
+DESCRICAO
+       	O comando mkifle cria um novo arquivo com o nome passado 
+	por parametro. Caso o arquivo já exista, é solicitado uma 
+	confirmação para a sobreescrita. Para usar esse comando 
+	basta digitar: mkfile seguido pelo nome do arquivo. Não são 
+	permitidos parametros adicionais.

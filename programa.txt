@@ -1,5 +1,10 @@
-manual do programa
-ças
-asld
-asldk
+PROGRAMA(1)                            Explicação do Programa                           PROGRAMA(1)
 
+DESCRICAO
+       	O arquivo shell.go é um programa feito em linguagem GO que simula um shell. 
+	Esse programa permite a utilização dos seguintes comandos: cd, ls, man, clear, 
+	mkfile, mkdir, rmfile, rmdir, locate, copy, cat, mv. Para executar esse 
+	programa abra seu terminal e digite o comando: go run shell.go, o programa inicia 
+	no diretorio em que se encontra o arquivo, a não ser que o usuario passe por parametro 
+	um diretorio para iniciar. Para sair do programa basta digitar o comando exit, ou 
+	gerar uma interrupção com Ctrl + C. 

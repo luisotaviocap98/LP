@@ -1,0 +1,15 @@
+CAT(1)                            Comando                          CAT(1)
+
+NOME
+       cat - imprime o conteudo de um arquivo
+
+SINOPSE
+       cat [arquivo]
+
+DESCRICAO
+	O comando cat imprime em modo texto na tela do terminal 
+	o conteudo do arquivo passado por parametro. Só é permitido 
+	ler arquivos existentes. Para usar esse comando basta 
+	digitar: cat seguido pelo nome do arquivo que se deseja ler. 
+	Não são permitidos parametros adicionais. 
+   

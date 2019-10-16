@@ -1,0 +1,13 @@
+CLEAR(1)                     Comando                    CLEAR(1)
+
+NOME
+       clear - limpa a tela do terminal
+
+SINOPSE
+       clear 
+
+DESCRICAO
+	O comando clear limpa a tela do terminal, ao final 
+	o cursor volta ao topo da tela. Para usar esse 
+	comando basta digitar: clear. Não são permitidos 
+	parametros adicionais.
