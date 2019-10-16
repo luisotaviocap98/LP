@@ -181,80 +181,78 @@ func recursiveParam(original []os.FileInfo, files, parametro []string) { //remov
 
 			// valid simples e com ordenação
 			if parametro[i] == "-valid" { //  não lista entradas implícitas (. e ..)
-				if len(parametro) == 2 {
-					if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
-						sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-					}
-
-					if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
-						sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-					}
-				}
 
 				for i := 0; i < len(original); i++ {
 					if original[i].Name() != "." || original[i].Name() != ".." {
-
 						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				}
+
+				for p := 0; p < len(parametro); p++ {
+					if parametro[p] == "-sortasc" {
+						sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+					}
+					if parametro[p] == "-sortdesc" {
+						sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
 					}
 				}
 			} else {
 
 				// hidden simples e com ordenação
 				if parametro[i] == "-hidden" { //  lista entradas ocultas
-					if len(parametro) == 2 {
-						if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
-							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-						}
-
-						if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
-							sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-						}
-					}
 
 					str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
 					str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
+
 					for i := 0; i < len(original); i++ {
 						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+
+					for p := 0; p < len(parametro); p++ {
+						if parametro[p] == "-sortasc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+						}
+						if parametro[p] == "-sortdesc" {
+							sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+						}
 					}
 				} else {
 
 					// dirs simples e com ordenação
 					if parametro[i] == "-dirs" { // lista somente diretórios
 
-						if len(parametro) == 2 {
-							if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
-								sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-							}
-
-							if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
-								sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-							}
-						}
-
 						for i := 0; i < len(original); i++ {
 							if original[i].IsDir() {
 								// fmt.Print("teste")
-
 								str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+							}
+						}
+
+						for p := 0; p < len(parametro); p++ {
+							if parametro[p] == "-sortasc" {
+								sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+							}
+							if parametro[p] == "-sortdesc" {
+								sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
 							}
 						}
 					} else {
 
 						// files simples e com ordenação
 						if parametro[i] == "-files" { //  lista somente arquivos
-							if len(parametro) == 2 {
-								if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
-									sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
-								}
-
-								if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
-									sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
-								}
-							}
 
 							for i := 0; i < len(original); i++ {
 								if !original[i].IsDir() {
 									str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+								}
+							}
+
+							for p := 0; p < len(parametro); p++ {
+								if parametro[p] == "-sortasc" {
+									sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+								}
+								if parametro[p] == "-sortdesc" {
+									sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
 								}
 							}
 						} else {
@@ -262,12 +260,12 @@ func recursiveParam(original []os.FileInfo, files, parametro []string) { //remov
 							// full simples e com ordenação
 							if parametro[i] == "-full" { //  lista todas as propriedades das entradas (date, size, owner,. . . )
 
-								if len(parametro) == 2 {
-									if parametro[0] == "-sortasc" || parametro[1] == "-sortasc" {
+								for p := 0; p < len(parametro); p++ {
+									if parametro[p] == "-sortasc" {
 										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) < strings.ToLower(original[j].Name()) })
 									}
 
-									if parametro[0] == "-sortdesc" || parametro[1] == "-sortdesc" {
+									if parametro[p] == "-sortdesc" {
 										sort.Slice(original, func(i, j int) bool { return strings.ToLower(original[i].Name()) > strings.ToLower(original[j].Name()) })
 									}
 								}
