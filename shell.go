@@ -11,7 +11,9 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -109,13 +111,210 @@ func leftjust(s string, n int, fill string) string {
 	return s + strings.Repeat(fill, n)
 }
 
-func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
-	fmt.Println("seus comandos", parametro)
+func imprimir(dados []string) {
 
-	if len(parametro) > 1 {
-		parametro = parametro[1:len(parametro)]
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, _ := cmd.Output()
+
+	//espacar nomes listados
+	x, tam := 1, 0
+	for i := len(out) - 2; i >= 3; i-- {
+		tam += (int(out[i]) - 48) * x
+		x = x * 10
 	}
-	fmt.Println("novo comandos", parametro)
+
+	// fmt.Println("seus comandos", parametro) // meus comandos
+	// fmt.Println("seus files", files)        // tenho os dados
+
+	// qtdParamUtil := 0
+	// for i := 0; i < len(parametro); i++ {
+	// 	if parametro[i] != "" {
+	// 		fmt.Println(parametro)
+	// 		qtdParamUtil += 1
+	// 	}
+	// }
+
+	if len(dados) > 0 {
+		cont := 0
+		for i := 0; i < len(dados); i++ {
+			st := dados[i]
+			cont += len(dados[i]) + 5 //verifica se o nome do arquivo cabe na tela
+			if cont < tam {
+				fmt.Printf(leftjust(st, 5, " "))
+			} else {
+				cont = 0
+				fmt.Printf("\n" + leftjust(st, 5, " "))
+			}
+		}
+		fmt.Printf("\n")
+	}
+}
+
+func recursiveParam(original []os.FileInfo, files, parametro []string) { //remover recursivo os parametros
+
+	// cmd := exec.Command("stty", "size")
+	// cmd.Stdin = os.Stdin
+	// out, _ := cmd.Output()
+
+	//espacar nomes listados
+	// x, tam := 1, 0
+	// for i := len(out) - 2; i >= 3; i-- {
+	// 	tam += (int(out[i]) - 48) * x
+	// 	x = x * 10
+	// }
+
+	// fmt.Println("seus comandos", parametro) // meus comandos
+	// fmt.Println("seus files", files)        // tenho os dados
+
+	qtdParamUtil := 0
+	for i := 0; i < len(parametro); i++ {
+		if parametro[i] != "" {
+			fmt.Println(parametro)
+			qtdParamUtil += 1
+		}
+	}
+
+	var str []string
+
+	if qtdParamUtil == 0 {
+		str = append(str, ".")  // adiciona oque ja tinha, mais os dados novos
+		str = append(str, "..") // adiciona oque ja tinha, mais os dados novos
+		for i := 0; i < len(original); i++ {
+			str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+		}
+
+	} else {
+
+		for i := 0; i < len(parametro); i++ {
+
+			if parametro[i] == "-valid" {
+				for i := 0; i < len(original); i++ {
+					if original[i].Name() != "." || original[i].Name() != ".." {
+
+						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				}
+			}
+
+			if parametro[i] == "-hidden" {
+				// 	if original[i].Name() == "."* {
+				for i := 0; i < len(original); i++ {
+					match, _ := regexp.MatchString("^\\..*", original[i].Name())
+					if match {
+
+						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				}
+			}
+
+			if parametro[i] == "-dirs" {
+				// 	if original[i].Name() == "."* {
+				for i := 0; i < len(original); i++ {
+					// match, _ := regexp.MatchString("\\..*", original[i].Name())
+					if original[i].IsDir() {
+
+						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				}
+			}
+
+			if parametro[i] == "-files" {
+				// 	if original[i].Name() == "."* {
+				for i := 0; i < len(original); i++ {
+					// match, _ := regexp.MatchString("^[a-z]+\\..*", original[i].Name())
+					if !original[i].IsDir() {
+
+						str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+					}
+				}
+			}
+
+			if parametro[i] == "-full" {
+				for i := 0; i < len(original); i++ {
+
+					fmt.Print(original[i].Mode()) // permissões
+					fmt.Print("      ")
+					fmt.Print(original[i].ModTime()) // ultima modificação (tempo)
+					fmt.Print("      ")
+					fmt.Print(original[i].Size()) // tamanho do arquivo
+					fmt.Print("      ")
+					fmt.Println(original[i].Name()) // nome do arquivo
+
+					// match, _ := regexp.MatchString("^[a-z]+\\..*", original[i].Name())
+
+					// str = append(str, string(original[i].Mode()))
+					// str = append(str, original[i].ModTime())
+
+					// str = append(str, original[i].Name()) // adiciona oque ja tinha, mais os dados novos
+
+				}
+			}
+
+			if parametro[i] == "-sortasc" {
+				for i := 0; i < len(original); i++ {
+					str = append(str, original[i].Name())
+				}
+				// sort.Strings(str)
+				sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) < strings.ToLower(str[j]) })
+
+			}
+
+			if parametro[i] == "-sortdesc" {
+				for i := 0; i < len(original); i++ {
+					str = append(str, original[i].Name())
+				}
+				sort.Slice(str, func(i, j int) bool { return strings.ToLower(str[i]) > strings.ToLower(str[j]) })
+			}
+
+			// if parametro == "sortasc"{
+			// strs := []string{"c", "a", "b"}
+			// sort.Strings(strs)
+			// fmt.Println("Strings:", strs)
+			// }
+			// if parametro == "sortdesc"{
+			//  sort.Sort(sort.Reverse(strSlice[:]))
+			// }
+
+		}
+	}
+
+	imprimir(str)
+
+	// 	cont := 0
+	// 	for i := 0; i < len(original); i++ {
+	// 		st := original[i].Name()
+	// 		cont += len(original[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
+	// 		if cont < tam {
+	// 			fmt.Printf(leftjust(st, 5, " "))
+	// 		} else {
+	// 			cont = 0
+	// 			fmt.Printf("\n" + leftjust(st, 5, " "))
+	// 		}
+	// 	}
+	// 	fmt.Printf("\n")
+	// }
+
+	// fmt.Println("seus original", original)
+
+	// for i := len(files) - 2; i >= 3; i-- {
+	// 	files[i] = ""
+	// }
+
+	// for i
+	// files[0] = files[1]
+
+	// if len(parametro) > 1 { // pega o segundo comando
+	// 	parametro = parametro[1:len(parametro)]
+	// 	fmt.Println("novo comandos", parametro)
+	// }
+
+	// var data [3]string
+
+	// data[0]
+	// // for i := len(parametro) - 2; i >= 3; i-- {
+
+	// for
 
 	// if parametro == "-dirs" {
 	// onlyd := true
@@ -161,22 +360,28 @@ func recursiveParam(original []os.FileInfo, files, parametro []string) { //remov
 }
 
 func ls(parametro []string) { //----------------------------------validado
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, _ := cmd.Output()
+	// cmd := exec.Command("stty", "size")
+	// cmd.Stdin = os.Stdin
+	// out, _ := cmd.Output()
 
-	//espacar nomes listados
-	x, tam := 1, 0
-	for i := len(out) - 2; i >= 3; i-- {
-		tam += (int(out[i]) - 48) * x
-		x = x * 10
-	}
+	// //espacar nomes listados
+	// x, tam := 1, 0
+	// for i := len(out) - 2; i >= 3; i-- {
+	// 	tam += (int(out[i]) - 48) * x
+	// 	x = x * 10
+	// }
 
 	dir, _ := os.Getwd()
 	arquivos, erro := ioutil.ReadDir(dir)
 	if erro != nil {
 		log.Fatal(erro)
 	}
+
+	// wd, err := os.Getwd()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// parent, _ := filepath.Dir(wd)
 
 	//copia para vetor strings
 	archs := make([]string, len(arquivos))
@@ -206,21 +411,24 @@ func ls(parametro []string) { //----------------------------------validado
 	recursiveParam(arquivos, archs, parametro)
 
 	// imprime os nomes dos arquivos
-	if len(arquivos) > 0 {
-		cont := 0
 
-		for i := 0; i < len(arquivos); i++ {
-			st := arquivos[i].Name()
-			cont += len(arquivos[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
-			if cont < tam {
-				fmt.Printf(leftjust(st, 5, " "))
-			} else {
-				cont = 0
-				fmt.Printf("\n" + leftjust(st, 5, " "))
-			}
-		}
-		fmt.Printf("\n")
-	}
+	// comentei aqui
+
+	// if len(arquivos) > 0 {
+	// 	cont := 0
+
+	// 	for i := 0; i < len(arquivos); i++ {
+	// 		st := arquivos[i].Name()
+	// 		cont += len(arquivos[i].Name()) + 5 //verifica se o nome do arquivo cabe na tela
+	// 		if cont < tam {
+	// 			fmt.Printf(leftjust(st, 5, " "))
+	// 		} else {
+	// 			cont = 0
+	// 			fmt.Printf("\n" + leftjust(st, 5, " "))
+	// 		}
+	// 	}
+	// 	fmt.Printf("\n")
+	// }
 }
 
 func mv(origem, destino string) { //----------------------------------validado
